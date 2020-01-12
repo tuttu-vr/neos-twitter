@@ -1,0 +1,8 @@
+version: '3'
+services:
+  collector:
+    build: collector
+    env_file: collector/.env
+    volumes: # for dev (TODO remove)
+      - ./collector:/app/src
+      # - ./data:/app/data
