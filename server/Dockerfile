@@ -1,10 +1,30 @@
-FROM tiangolo/uwsgi-nginx-flask:python3.6-alpine3.7
+FROM python:3.7-alpine3.11
 
-ENV STATIC_PATH /app/myapp/static
+RUN apk update && \
+    apk add --no-cache wget bash curl supervisor build-base pcre-dev \
+    supervisor \
+    unzip jq
 
-RUN apk --update add tzdata && \
-    cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
-    apk del tzdata && \
-    rm -rf /var/cache/apk/*
-COPY ./requirements.txt /app
+# a tool for local execute
+ADD https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip /tmp
+
+RUN unzip /tmp/ngrok-stable-linux-amd64.zip && \
+    mv ngrok /usr/local/bin/
+
+COPY supervisord/supervisord.conf /etc/
+RUN install -d /var/log/supervisor/
+
+ARG application_arg=""
+ENV APPLICATION_ARG=${application_arg}
+
+WORKDIR /app
+
+COPY ./requirements.txt ./
 RUN pip install -r requirements.txt
+
+COPY *.py ./src/
+COPY *.sh ./
+
+EXPOSE 80
+
+CMD [ "supervisord", "-c", "/etc/supervisord.conf" ]

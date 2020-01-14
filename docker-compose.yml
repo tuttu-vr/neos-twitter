@@ -1,8 +1,22 @@
-version: '3'
+version: '3.7'
 services:
   collector:
-    build: collector
+    build:
+      context: collector
     env_file: collector/.env
-    volumes: # for dev (TODO remove)
+    volumes:
       - ./collector:/app/src
-      # - ./data:/app/data
+      - ./data:/app/data
+  server:
+    build:
+      context: server
+      args:
+        application_arg: "--debug"
+    env_file: server/.env
+    depends_on:
+      - collector
+    volumes:
+      - ./server:/app/src
+      - ./data:/app/data
+    ports:
+        - 80:80

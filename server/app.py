@@ -11,13 +11,13 @@ logger = getLogger(__name__)
 def process_messages(messages):
     # TODO process have to be into Message class
     text_list = ['%sさん: %s' % (mes['name'], mes['message']) for mes in messages]
-    response = '|'.join(text_list)
+    response = '\n'.join(text_list)
     return response
 
 
 @app.route('/recent')
 def get_recent():
-    count = request.args.get('count', default=0, type=int)
+    count = request.args.get('count', default=3, type=int)
     messages = db.get_recent_messages(count)
     response = process_messages(messages)
     return response
@@ -40,8 +40,4 @@ if __name__ == '__main__':
     args = get_arguments()
     logging_config(args.debug)
 
-    # TODO don't change debug case here
-    if args.debug:
-        app.run(host="0.0.0.0", port=8080, debug=True)
-    else:
-        app.run(port=80)
+    app.run(port=80, debug=args.debug)

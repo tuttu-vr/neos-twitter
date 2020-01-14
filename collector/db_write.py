@@ -19,6 +19,9 @@ def migration():
         create table messages(
             message_id text primary key, message text, name text, created_datetime text
         )""")
+    con.commit()
+    con.close()
+    logger.info('table messages created')
 
 
 def put_messages(messages):
@@ -27,9 +30,14 @@ def put_messages(messages):
 
     logger.info('inserting messages')
     for mes in messages:
-        cur.execute("""replace into messages values(
-            '%(message_id)s', '%(message)s', '%(name)s', '%(created_datetime)s'
-        )""" % mes)
+        try:
+            cur.execute("""replace into messages values(
+                '%(message_id)s', '%(message)s', '%(name)s', '%(created_datetime)s'
+            )""" % mes)
+        except sqlite3.OperationalError as e:
+            logger.error('failed to put message')
+            logger.error(mes)
+            continue
     con.commit()
     con.close()
     logger.info(f'inserted {len(messages)} messages')

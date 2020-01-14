@@ -18,7 +18,7 @@ def get_recent_messages(count: int=3):
     logger.info('getting messages')
     # TODO set order by created_datetime
     sql = f"""
-        select * from messages limit {count}
+        select * from messages order by created_datetime desc limit {count}
     """
     cur.execute(sql)
     messages = cur.fetchall()

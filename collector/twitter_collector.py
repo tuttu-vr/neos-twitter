@@ -2,7 +2,6 @@ import os
 import urllib.parse
 import sqlite3
 import time
-
 from logging import getLogger, DEBUG, StreamHandler
 
 from dotenv import load_dotenv
@@ -58,15 +57,17 @@ def timeline_to_dict_iter(timeline):
 
 
 def pipeline(timeline_iter):
-    rt_removed = filter(lambda tw: not tw['message'].startswith('RT '), timeline_iter)
-    line_formatted = map(lambda tw: tw['message'] = tw['message'].replace('\n', ' '), rt_removed)
-    return line_formatted
+    rt_removed = list(filter(lambda tw: not tw['message'].startswith('RT '), timeline_iter))
+    for tw in rt_removed:
+        tw['message'] = tw['message'].replace('\n', ' ')
+    return rt_removed
 
 
 def store_timeline(timeline):
+    logger.debug(f'Got {len(timeline)} tweets')
     timeline_iter = timeline_to_dict_iter(timeline)
-    timeline_iter = pipeline(timeline_iter)
-    db.put_messages(list(timeline_iter))
+    timeline_list = pipeline(timeline_iter)
+    db.put_messages(timeline_list)
 
 
 NUM_TIMELINE_GET_COUNT = 50
@@ -79,12 +80,14 @@ def main():
             timeline = api.GetHomeTimeline(count=NUM_TIMELINE_GET_COUNT)
             logger.info('success getting timeline')
             store_timeline(timeline)
-            time.sleep(60)
+            time.sleep(90)
         except KeyboardInterrupt as e:
             logger.info('finish')
             break
+        except tw.TwitterError as e:
+            logger.error(e)
+            time.sleep(10 * 60)
 
 
 if __name__ == '__main__':
-    db.migration()
     main()
