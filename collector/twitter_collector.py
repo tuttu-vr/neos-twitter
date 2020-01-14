@@ -2,6 +2,7 @@ import os
 import urllib.parse
 import sqlite3
 import time
+import datetime
 from logging import getLogger, DEBUG, StreamHandler
 
 from dotenv import load_dotenv
@@ -20,6 +21,7 @@ CONSUMER_SECRET = os.getenv('TWITTER_CONSUMER_SECRET', '')
 ACCESS_TOKEN = os.getenv('TWITTER_ACCESS_TOKEN', '')
 ACCESS_SECRET = os.getenv('TWITTER_ACCESS_SECRET', '')
 
+DATETIME_FORMAT = '%a %b %d %H:%M:%S %z %Y'
 
 def get_twitter_api():
     api = tw.Api(consumer_key=CONSUMER_KEY,
@@ -60,6 +62,7 @@ def pipeline(timeline_iter):
     rt_removed = list(filter(lambda tw: not tw['message'].startswith('RT '), timeline_iter))
     for tw in rt_removed:
         tw['message'] = tw['message'].replace('\n', ' ')
+        tw['created_datetime'] = datetime.datetime.strptime(tw['created_datetime'], DATETIME_FORMAT)
     return rt_removed
 
 

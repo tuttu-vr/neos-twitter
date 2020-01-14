@@ -4,4 +4,6 @@
 /.venv/
 /.vscode/
 
+/sample/
+
 *.sqlite3

@@ -6,7 +6,7 @@ logger.addHandler(StreamHandler())
 logger.setLevel(DEBUG)
 
 db_path = 'data/db.sqlite3'
-
+DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 def get_connection():
     return sqlite3.connect(db_path)
@@ -30,6 +30,7 @@ def put_messages(messages):
 
     logger.info('inserting messages')
     for mes in messages:
+        mes['created_datetime'] = mes['created_datetime'].strftime(DATETIME_FORMAT)
         try:
             cur.execute("""replace into messages values(
                 '%(message_id)s', '%(message)s', '%(name)s', '%(created_datetime)s'
