@@ -20,6 +20,11 @@ NGROK_AUTH_TOKEN=<your_ngrok_token>
 
 # run
 
+At the root of this project, you run
 ```
 docker-compose up
 ```
+
+If you execute that, twitter collector and server will launch.
+Then ngrok url(ex. http://xxxyyyzz.ngrok.io) will be displayed on your console.
+You can access api by the url of http://xxxyyyzz.ngrok.io/recent .
