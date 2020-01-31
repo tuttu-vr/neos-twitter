@@ -13,7 +13,7 @@ TWITTER_ACCESS_TOKEN=<your_access_token>
 TWITTER_ACCESS_SECRET=<your_access_secret>
 ```
 
-Write to server/.env if needed (to launch server in your private network)
+Write to server/.env if needed (to publish your server in private network)
 ```
 NGROK_AUTH_TOKEN=<your_ngrok_token>
 ```
