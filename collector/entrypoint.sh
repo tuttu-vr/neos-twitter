@@ -8,4 +8,4 @@ if [ ! -e $FILE ]; then
   python src/db_write.py
 fi
 
-python src/twitter_collector.py
+python src/twitter/collector.py
