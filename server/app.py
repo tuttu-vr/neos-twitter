@@ -9,10 +9,13 @@ app = Flask(__name__)
 logger = getLogger(__name__)
 
 
+DELIMITER = '%&'
+
+
 def process_messages(messages, start_time):
     # TODO process have to be into Message class
-    text_list = ['%sさん[%s]: %s' % (mes['name'], mes['created_datetime'], mes['message']) for mes in messages]
-    response = '\n'.join(text_list)
+    text_list = ['%sさん: %s' % (mes['name'], mes['message']) for mes in messages]
+    response = DELIMITER.join(text_list)
     return start_time + '|' + response
 
 
@@ -21,8 +24,8 @@ def get_recent():
     count      = request.args.get('count', default=3, type=int)
     offset     = request.args.get('offset', default=0, type=int)
     start_time = request.args.get('start_time', default=None, type=str)
-    if start_time is None:
-        start_time = (datetime.datetime.now() - datetime.timedelta(minutes=30)).strftime(db.DATETIME_FORMAT)
+    if not start_time:
+        start_time = (datetime.datetime.now() - datetime.timedelta(minutes=60)).strftime(db.DATETIME_FORMAT)
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
     messages = db.get_recent_messages(count, offset, start_time)
     response = process_messages(messages, start_time)
