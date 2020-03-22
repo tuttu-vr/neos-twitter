@@ -27,6 +27,12 @@ def get_recent():
     start_time = request.args.get('start_time', default=None, type=str)
     if not start_time:
         start_time = (datetime.datetime.now() - datetime.timedelta(minutes=DEFAULT_BACKTIME_MINUTES)).strftime(db.DATETIME_FORMAT)
+    else:
+        try:
+            datetime.datetime.strptime(date_text, db.DATETIME_FORMAT)
+        except ValueError:
+            # to avoid sql injection
+            return f'error: start time format must be {db.DATETIME_FORMAT} but "{start_time}"'
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
     messages = db.get_recent_messages(count, offset, start_time)
     for mes in messages:

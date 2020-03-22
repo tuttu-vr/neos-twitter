@@ -1,4 +1,5 @@
 import sqlite3
+import datetime
 from logging import getLogger, DEBUG, StreamHandler
 
 logger = getLogger(__name__)
@@ -42,6 +43,17 @@ def put_messages(messages):
     con.commit()
     con.close()
     logger.info(f'inserted {len(messages)} messages')
+
+
+def delete_old_messages(hour_before: int=48):
+    con = get_connection()
+    cur = con.cursor()
+
+    logger.info('deleting messages')
+    delete_from = (datetime.datetime.now() - datetime.timedelta(hours=hour_before)).strftime(db.DATETIME_FORMAT)
+    cur.execute(
+        f"""delete from messages
+        where created_datetime <= {delete_from}""")
 
 
 if __name__ == '__main__':
