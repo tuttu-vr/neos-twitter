@@ -74,6 +74,7 @@ def store_timeline(timeline):
 
 
 NUM_TIMELINE_GET_COUNT = 50
+TTL_HOUR_MESSAGES = 48
 
 def main():
     api = get_twitter_api()
@@ -83,6 +84,7 @@ def main():
             timeline = api.GetHomeTimeline(count=NUM_TIMELINE_GET_COUNT)
             logger.info('success getting timeline')
             store_timeline(timeline)
+            db.delete_old_messages(hour_before=TTL_HOUR_MESSAGES)
             time.sleep(90)
         except KeyboardInterrupt as e:
             logger.info('finish')
