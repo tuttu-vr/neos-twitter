@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+  collector:
+    image: message-collector:${TAG}
+    build:
+      context: collector
+  server:
+    image: message-api:${TAG}
+    build:
+      context: server
+    depends_on:
+      - collector
+    ports:
+        - 80:80
