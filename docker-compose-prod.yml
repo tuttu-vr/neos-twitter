@@ -1,11 +1,11 @@
 version: '3.7'
 services:
   collector:
-    image: message-collector:${TAG}
+    image: tuttuvr/message-collector:${TAG}
     build:
       context: collector
   server:
-    image: message-api:${TAG}
+    image: tuttuvr/message-api:${TAG}
     build:
       context: server
     depends_on:
