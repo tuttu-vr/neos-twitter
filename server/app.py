@@ -11,12 +11,13 @@ logger = getLogger(__name__)
 
 DELIMITER = '%&'
 
+DEFAULT_BACKTIME_MINUTES = 30
 
 def process_messages(messages, start_time):
     # TODO process have to be into Message class
     text_list = ['%sさん: %s' % (mes['name'], mes['message']) for mes in messages]
     response = DELIMITER.join(text_list)
-    return start_time + '|' + response
+    return f'{start_time}|{len(text_list)}|{response}'
 
 
 @app.route('/recent')
@@ -25,9 +26,11 @@ def get_recent():
     offset     = request.args.get('offset', default=0, type=int)
     start_time = request.args.get('start_time', default=None, type=str)
     if not start_time:
-        start_time = (datetime.datetime.now() - datetime.timedelta(minutes=60)).strftime(db.DATETIME_FORMAT)
+        start_time = (datetime.datetime.now() - datetime.timedelta(minutes=DEFAULT_BACKTIME_MINUTES)).strftime(db.DATETIME_FORMAT)
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
     messages = db.get_recent_messages(count, offset, start_time)
+    for mes in messages:
+        logger.debug(mes['message'])
     response = process_messages(messages, start_time)
     return response
 

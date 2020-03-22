@@ -3,9 +3,10 @@
 set -x
 
 FILE="data/db.sqlite3"
+CLIENT_NAME=${COLLECTOR_CLIENT_NAME:twitter}
 
 if [ ! -e $FILE ]; then
-  python src/db_write.py
+  python src/lib/db_write.py
 fi
 
-python src/twitter/collector.py
+PYTHONPATH=src python src/${CLIENT_NAME}-client/collector.py
