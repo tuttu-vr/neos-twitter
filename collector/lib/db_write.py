@@ -49,11 +49,17 @@ def delete_old_messages(hour_before: int=48):
     con = get_connection()
     cur = con.cursor()
 
-    logger.info('deleting messages')
-    delete_from = (datetime.datetime.now() - datetime.timedelta(hours=hour_before)).strftime(db.DATETIME_FORMAT)
-    cur.execute(
-        f"""delete from messages
-        where created_datetime <= {delete_from}""")
+    delete_from = (datetime.datetime.now() - datetime.timedelta(hours=hour_before)).strftime(DATETIME_FORMAT)
+    sql = f"""
+        %s from messages
+        where created_datetime <= '{delete_from}'
+    """
+    cur.execute(sql % 'select count(*)')
+    count = cur.fetchone()[0]
+    logger.info(f'deleting {count} messages')
+    cur.execute(sql % 'delete')
+    con.commit()
+    con.close()
 
 
 if __name__ == '__main__':
