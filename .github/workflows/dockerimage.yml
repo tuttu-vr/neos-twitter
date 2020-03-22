@@ -13,14 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TAG: ${{ github.ref }}-${{ github.run_id }}
+      TAG: ${{ github.payload.pull_request.head.ref }}-${{ github.run_id }}
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker images
       run: |
-        docker login --username="${{ secrets.DOCKER_HUB_NAME }}" --password="${{ secrets.DOCKER_HUB_PASS }}"
+        echo $TAG
+        echo ${{ github.base_ref }}
+        echo ${{ github.ref }}
         mv docker-compose-prod.yml docker-compose.yml
         docker-compose build
     - name: Push the Docker images
       if: ${{ github.ref == 'master' }}
-      run: docker-compose push
+      run: |
+        docker login --username="${{ secrets.DOCKER_HUB_NAME }}" --password="${{ secrets.DOCKER_HUB_PASS }}"
+        docker-compose push
