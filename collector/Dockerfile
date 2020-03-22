@@ -9,11 +9,6 @@ RUN apk update && apk upgrade && apk add --no-cache --update sqlite-dev \
 ARG CLIENT_NAME=twitter
 ENV COLLECTOR_CLIENT_NAME=$CLIENT_NAME
 
-ENV TWITTER_CONSUMER_KEY=
-ENV TWITTER_CONSUMER_SECRET=
-ENV TWITTER_ACCESS_TOKEN=
-ENV TWITTER_ACCESS_SECRET=
-
 WORKDIR /app
 
 COPY requirements.txt ./
