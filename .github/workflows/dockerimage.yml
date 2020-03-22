@@ -12,6 +12,8 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      TAG: ${{ github.ref }}-${{ github.run_id }}
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker images
@@ -19,10 +21,6 @@ jobs:
         docker login --username="${{ secrets.DOCKER_HUB_NAME }}" --password="${{ secrets.DOCKER_HUB_PASS }}"
         mv docker-compose-prod.yml docker-compose.yml
         docker-compose build
-      env:
-        TAG: ${{ github.ref }}-${{ github.run_id }}
-
-    steps:
     - name: Push the Docker images
       if: ${{ github.ref == 'master' }}
       run: docker-compose push
