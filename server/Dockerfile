@@ -14,9 +14,6 @@ RUN unzip /tmp/ngrok-stable-linux-amd64.zip && \
 COPY supervisord/supervisord.conf /etc/
 RUN install -d /var/log/supervisor/
 
-ARG application_arg=""
-ENV APPLICATION_ARG=${application_arg}
-
 WORKDIR /app
 
 COPY ./requirements.txt ./
