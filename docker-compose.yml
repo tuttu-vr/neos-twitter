@@ -13,6 +13,8 @@ services:
       args:
         application_arg: "--debug"
     env_file: server/.env
+    environment:
+      APPLICATION_ARG: '--debug'
     depends_on:
       - collector
     volumes:

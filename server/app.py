@@ -50,6 +50,8 @@ def logging_config(debug=False):
 def get_arguments():
     parser = argparse.ArgumentParser(description='This is personal twitter api.')
     parser.add_argument('--debug', action='store_true', help='enable debug mode')
+    parser.add_argument('--host', default='localhost', help='specify host name')
+    parser.add_argument('--port', type=int, default=80, help='specify port')
     args = parser.parse_args()
     return args
 
@@ -58,4 +60,4 @@ if __name__ == '__main__':
     args = get_arguments()
     logging_config(args.debug)
 
-    app.run(port=80, debug=args.debug)
+    app.run(port=args.port, host=args.host, debug=args.debug)

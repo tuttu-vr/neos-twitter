@@ -4,10 +4,13 @@ services:
     image: tuttuvr/message-collector:${TAG}
     build:
       context: collector
+    env_file: collector/.env
   server:
     image: tuttuvr/message-api:${TAG}
     build:
       context: server
+    environment:
+      APPLICATION_ARG: '--host 0.0.0.0'
     depends_on:
       - collector
     ports:

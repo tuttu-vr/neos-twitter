@@ -7,3 +7,4 @@
 /sample/
 
 *.sqlite3
+deploy.sh
