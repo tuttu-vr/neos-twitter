@@ -17,8 +17,10 @@ jobs:
       run: |
         mv docker-compose-prod.yml docker-compose.yml
         docker-compose build
+        TAG=latest docker-compose build
     - name: Push the Docker images
       if: github.event_name == 'push'
       run: |
         docker login --username="${{ secrets.DOCKER_HUB_NAME }}" --password="${{ secrets.DOCKER_HUB_PASS }}"
         docker-compose push
+        TAG=latest docker-compose push
