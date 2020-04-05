@@ -9,6 +9,25 @@ logger.setLevel(DEBUG)
 db_path = 'data/db.sqlite3'
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
+table_messages = """
+create table messages(
+    message_id text primary key,
+    message text,
+    attachments text,
+    user_id text,
+    created_datetime text,
+    client text
+)
+"""
+table_users = """
+create table users(
+    user_id text primary key,
+    name text,
+    icon_url text,
+    client text
+)
+"""
+
 def get_connection():
     return sqlite3.connect(db_path)
 
@@ -16,10 +35,8 @@ def get_connection():
 def migration():
     con = get_connection()
     cur = con.cursor()
-    cur.execute("""
-        create table messages(
-            message_id text primary key, message text, name text, created_datetime text
-        )""")
+    cur.execute(table_messages)
+    cur.execute(table_users)
     con.commit()
     con.close()
     logger.info('table messages created')
@@ -34,15 +51,42 @@ def put_messages(messages):
         mes['created_datetime'] = mes['created_datetime'].strftime(DATETIME_FORMAT)
         try:
             cur.execute("""replace into messages values(
-                '%(message_id)s', '%(message)s', '%(name)s', '%(created_datetime)s'
+                '%(message_id)s',
+                '%(message)s',
+                '%(attachments)s',
+                '%(user_id)s',
+                '%(created_datetime)s',
+                '%(client)s'
             )""" % mes)
         except sqlite3.OperationalError as e:
-            logger.error('failed to put message')
+            logger.error('failed to put a message')
             logger.error(mes)
             continue
     con.commit()
     con.close()
     logger.info(f'inserted {len(messages)} messages')
+
+
+def put_user(user_list):
+    con = get_connection()
+    cur = con.cursor()
+
+    logger.info('inserting users')
+    for user in user_list:
+        try:
+            cur.execute("""replace into users values(
+                '%(user_id)s',
+                '%(name)s',
+                '%(icon_url)s',
+                '%(client)s'
+            )""" % user)
+        except sqlite3.OperationalError as e:
+            logger.error('failed to put an user')
+            logger.error(user)
+            continue
+    con.commit()
+    con.close()
+    logger.info(f'inserted {len(user)} users')
 
 
 def delete_old_messages(hour_before: int=48):

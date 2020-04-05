@@ -2,17 +2,102 @@
 
 ## ソースコード側
 
-- 一定期間経過したデータの自動破棄
-- サーバーへのデプロイ
+- [x] 一定期間経過したデータの自動破棄
+- [x] サーバーへのデプロイ
   - CircleCI連携
+  - [x] CircleCIではなくgithub actionsに
 - テストを書く
+- [x] messageのフォーマットを再整理
+- user dbを作成
+  - iconをdbに追加
+  - twitterのnameの形式を変更
+    - <screen_name>@<id>の形式に
+  - 画像をparseしやすい形式で追加
+    - dbにattachカラムを追加する？
+- messageをencodeして送信するようにする
+
+- user dataの取得を可能に
+- tweet可能なentrypointを用意
+- ブラウザログインの実装
+- 独自認証キーの発行
+- fav, retweetの取得・表示
+- fav, retweetを可能に
 
 ## LogiX側
 
 - 画像の表示
 - UIの整備
 
+# 仕様
+
+## DB
+
+### messages
+
+- message_id: PK
+- message
+- user_id
+- attachments
+  - カンマ区切りのテキスト
+- created_datetime
+- client
+  - twitter or discord
+
+### user
+
+- user_id: PK
+- name
+- display_id
+- icon_url
+- client
+
+## response
+
+BNF
+
+<response> := <datetime>"|"<num_of_messages>"|"<messages>
+<datetime> := "yyyy-mm-dd HH:MM:ss"
+<num_of_messages> := int
+<messages> := <message>["$"<messages>]
+<message>  := <datetime>";"<name>";"<icon_url>";"<images>";"<text>
+<name>     := string (url encoded)
+<icon_url> := string (url encoded)
+<images>   := <image_url>[","<images>]
+<image_url>:= string (url encoded)
+<text>     := string (url encoded)
+
 # memo
+
+## 4/5
+
+### TODO
+
+- collector.py
+  - [x] timeline_to_dict_iter
+    - media取得
+    - client追加
+    - name,screen_name
+  - [x] pipeline
+    - messageをurlencode
+    - nameをurlencode
+  - [x] store_timeline
+    - user格納処理を追加
+- db_write.py
+  - [x] migration
+    - messagesの形式変更
+      - media
+      - client
+    - userを追加
+  - [x] put_messages
+  - [x] 追加: update_user
+- app.py
+  - [x] process_messages
+- db_read.py
+  - [x] get_recent_messages
+    - userをjoinして取得
+    - その他変更部分
+
+## old
 
 - セッション的なものをどう管理するか
   - あるクライアントについて、どこまで読み込んだか or どこがスタートか、を保持する必要がある
