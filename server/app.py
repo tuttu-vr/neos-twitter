@@ -1,5 +1,6 @@
 import argparse
 import datetime
+from urllib.parse import quote
 from logging import getLogger, DEBUG, INFO, basicConfig
 from flask import Flask, request
 
@@ -9,13 +10,22 @@ app = Flask(__name__)
 logger = getLogger(__name__)
 
 
-DELIMITER = '%&'
+DELIMITER = '$'
 
 DEFAULT_BACKTIME_MINUTES = 30
 
+
 def process_messages(messages, start_time):
     # TODO process have to be into Message class
-    text_list = ['%sさん: %s' % (mes['name'], mes['message']) for mes in messages]
+    def process_message(mes):
+        return ';'.join([
+            quote(mes['created_datetime']),
+            quote(mes['name']),
+            quote(mes['icon_url']),
+            quote(mes['attachments']) if mes['attachments'] else '',
+            quote(mes['message'])
+        ])
+    text_list = [process_message(mes) for mes in messages]
     response = DELIMITER.join(text_list)
     return f'{start_time}|{len(text_list)}|{response}'
 

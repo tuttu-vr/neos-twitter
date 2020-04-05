@@ -5,6 +5,8 @@ services:
     build:
       context: collector
     env_file: collector/.env
+    volumes:
+      - /var/db/neos-twitter:/app/data
   server:
     image: tuttuvr/message-api:${TAG}
     build:
@@ -14,4 +16,6 @@ services:
     depends_on:
       - collector
     ports:
-        - 80:80
+      - 80:80
+    volumes:
+      - /var/db/neos-twitter:/app/data

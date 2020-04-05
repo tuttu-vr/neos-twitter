@@ -23,6 +23,7 @@ ACCESS_SECRET = os.getenv('TWITTER_ACCESS_SECRET', '')
 
 DATETIME_FORMAT = '%a %b %d %H:%M:%S %z %Y'
 
+
 def get_twitter_api():
     api = tw.Api(consumer_key=CONSUMER_KEY,
                  consumer_secret=CONSUMER_SECRET,
@@ -49,28 +50,63 @@ def debug_timeline(timeline):
         logger.debug(display)
 
 
-def timeline_to_dict_iter(timeline):
-    return map(lambda t: {
-        'message_id': t.id,
-        'message': t.text,
-        'name': t.user.screen_name,
-        'created_datetime': t.created_at
-    }, timeline)
+def tweet_to_dict(tweet):
+    media = ''
+    if tweet.media:
+        media = ','.join(map(
+            lambda m: m.media_url_https, filter(
+                lambda m: m.type=='photo', tweet.media)))
+    tweet_dic = {
+        'message_id': tweet.id,
+        'message': tweet.text,
+        'attachments': media,
+        'user_id': tweet.user.id_str,
+        'created_datetime': tweet.created_at,
+        'client': 'twitter'
+    }
+    return tweet_dic
 
 
-def pipeline(timeline_iter):
-    rt_removed = list(filter(lambda tw: not tw['message'].startswith('RT '), timeline_iter))
+def user_to_dict(user):
+    return {
+        'user_id': user.id_str,
+        'name': f'{user.name}@{user.screen_name}',
+        'icon_url': user.profile_image_url_https,
+        'client': 'twitter'
+    }
+
+
+def extract_timeline(timeline):
+    tweet_list = []
+    user_list = []
+    for tweet in timeline:
+        tweet_list.append(tweet_to_dict(tweet))
+        user_list.append(user_to_dict(tweet.user))
+
+    return tweet_list, user_list
+
+
+def tweet_pipeline(tweet_list):
+    rt_removed = list(filter(lambda tw: not tw['message'].startswith('RT '), tweet_list))
     for tw in rt_removed:
-        tw['message'] = tw['message'].replace('\n', ' ')
         tw['created_datetime'] = datetime.datetime.strptime(tw['created_datetime'], DATETIME_FORMAT)
     return rt_removed
 
 
+def user_pipeline(user_list):
+    user_set = {}
+    for user in user_list:
+        user_set[user['user_id']] = user
+    return list(user_set.values())
+
+
 def store_timeline(timeline):
     logger.debug(f'Got {len(timeline)} tweets')
-    timeline_iter = timeline_to_dict_iter(timeline)
-    timeline_list = pipeline(timeline_iter)
-    db.put_messages(timeline_list)
+    tweet_list, user_list = extract_timeline(timeline)
+    processed_tweet_list = tweet_pipeline(tweet_list)
+    processed_user_list = user_pipeline(user_list)
+    db.put_messages(processed_tweet_list)
+    db.put_user(processed_user_list)
 
 
 NUM_TIMELINE_GET_COUNT = 50
