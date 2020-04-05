@@ -8,13 +8,13 @@
   - [x] CircleCIではなくgithub actionsに
 - テストを書く
 - [x] messageのフォーマットを再整理
-- user dbを作成
+- [x] user dbを作成
   - iconをdbに追加
   - twitterのnameの形式を変更
     - <screen_name>@<id>の形式に
   - 画像をparseしやすい形式で追加
     - dbにattachカラムを追加する？
-- messageをencodeして送信するようにする
+- [x] messageをencodeして送信するようにする
 
 - user dataの取得を可能に
 - tweet可能なentrypointを用意

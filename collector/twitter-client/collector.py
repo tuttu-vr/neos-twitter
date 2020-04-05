@@ -89,7 +89,9 @@ def extract_timeline(timeline):
 def tweet_pipeline(tweet_list):
     rt_removed = list(filter(lambda tw: not tw['message'].startswith('RT '), tweet_list))
     for tw in rt_removed:
-        tw['created_datetime'] = datetime.datetime.strptime(tw['created_datetime'], DATETIME_FORMAT)
+        tz_utc = datetime.timezone(datetime.timedelta(hours=0), 'UTC')
+        tw['created_datetime'] = datetime.datetime.strptime(
+            tw['created_datetime'], DATETIME_FORMAT).astimezone(tz_utc)
     return rt_removed
 
 
