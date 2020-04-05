@@ -14,12 +14,16 @@ DELIMITER = '$'
 
 DEFAULT_BACKTIME_MINUTES = 30
 
+TIMEZONE_LOCAL = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
+TIMEZONE_UTC = datetime.timezone(datetime.timedelta(hours=+0), 'UTC')
 
 def process_messages(messages, start_time):
     # TODO process have to be into Message class
     def process_message(mes):
+        utc_time = datetime.datetime.strptime(mes['created_datetime'], db.DATETIME_FORMAT)
+        local_time_str = utc_time.astimezone(TIMEZONE_LOCAL).strftime(db.DATETIME_FORMAT)
         return ';'.join([
-            quote(mes['created_datetime']),
+            quote(local_time_str),
             quote(mes['name']),
             quote(mes['icon_url']),
             quote(mes['attachments']) if mes['attachments'] else '',
@@ -36,15 +40,18 @@ def get_recent():
     offset     = request.args.get('offset', default=0, type=int)
     start_time = request.args.get('start_time', default=None, type=str)
     if not start_time:
-        start_time = (datetime.datetime.now() - datetime.timedelta(minutes=DEFAULT_BACKTIME_MINUTES)).strftime(db.DATETIME_FORMAT)
+        start_time_utc = (datetime.datetime.now(TIMEZONE_UTC) - datetime.timedelta(minutes=DEFAULT_BACKTIME_MINUTES))
+        start_time = start_time_utc.astimezone(TIMEZONE_LOCAL).strftime(db.DATETIME_FORMAT)
     else:
         try:
-            datetime.datetime.strptime(start_time, db.DATETIME_FORMAT)
+            start_time_local = datetime.datetime.strptime(start_time, db.DATETIME_FORMAT).replace(tzinfo=TIMEZONE_LOCAL)
+            start_time_utc = start_time_local.astimezone(TIMEZONE_UTC)
+            logger.debug(start_time_utc)
         except ValueError:
             # to avoid sql injection
             return f'error: start time format must be "{db.DATETIME_FORMAT}" but "{start_time}"'
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
-    messages = db.get_recent_messages(count, offset, start_time)
+    messages = db.get_recent_messages(count, offset, start_time_utc.strftime(db.DATETIME_FORMAT))
     for mes in messages:
         logger.debug(mes['message'])
     response = process_messages(messages, start_time)
