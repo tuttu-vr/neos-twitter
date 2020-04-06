@@ -111,7 +111,7 @@ def store_timeline(timeline):
     db.put_user(processed_user_list)
 
 
-NUM_TIMELINE_GET_COUNT = 50
+NUM_TIMELINE_GET_COUNT = 100
 TTL_HOUR_MESSAGES = 48
 
 def main():

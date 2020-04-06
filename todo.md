@@ -2,20 +2,6 @@
 
 ## ソースコード側
 
-- [x] 一定期間経過したデータの自動破棄
-- [x] サーバーへのデプロイ
-  - CircleCI連携
-  - [x] CircleCIではなくgithub actionsに
-- テストを書く
-- [x] messageのフォーマットを再整理
-- [x] user dbを作成
-  - iconをdbに追加
-  - twitterのnameの形式を変更
-    - <screen_name>@<id>の形式に
-  - 画像をparseしやすい形式で追加
-    - dbにattachカラムを追加する？
-- [x] messageをencodeして送信するようにする
-
 - user dataの取得を可能に
 - tweet可能なentrypointを用意
 - ブラウザログインの実装
@@ -26,7 +12,7 @@
 ## LogiX側
 
 - 画像の表示
-- UIの整備
+- [x] UIの整備
 
 # 仕様
 
@@ -47,14 +33,13 @@
 
 - user_id: PK
 - name
-- display_id
 - icon_url
 - client
 
 ## response
 
 BNF
-
+```
 <response> := <datetime>"|"<num_of_messages>"|"<messages>
 <datetime> := "yyyy-mm-dd HH:MM:ss"
 <num_of_messages> := int
@@ -65,6 +50,7 @@ BNF
 <images>   := <image_url>[","<images>]
 <image_url>:= string (url encoded)
 <text>     := string (url encoded)
+```
 
 # memo
 
@@ -97,6 +83,21 @@ BNF
     - userをjoinして取得
     - その他変更部分
 
+
+- [x] 一定期間経過したデータの自動破棄
+- [x] サーバーへのデプロイ
+  - CircleCI連携
+  - [x] CircleCIではなくgithub actionsに
+- テストを書く
+- [x] messageのフォーマットを再整理
+- [x] user dbを作成
+  - iconをdbに追加
+  - twitterのnameの形式を変更
+    - <screen_name>@<id>の形式に
+  - 画像をparseしやすい形式で追加
+    - dbにattachカラムを追加する？
+- [x] messageをencodeして送信するようにする
+
 ## old
 
 - セッション的なものをどう管理するか
@@ -111,7 +112,7 @@ BNF
 1. 最新tweetを表示
   - flaskサーバー立てる
     - [x] local
-    - [ ] docker
+    - [x] docker
   - [x] 最新home tweet3つを取得するendpointを作成
   - [x] ngrokをdockerに入れ、環境変数で設定可能にする
 2. [x] 文字列分割を試す
