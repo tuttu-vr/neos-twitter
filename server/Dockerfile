@@ -17,7 +17,7 @@ RUN install -d /var/log/supervisor/
 WORKDIR /app
 
 COPY ./requirements.txt ./
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY *.py ./src/
 COPY *.sh ./

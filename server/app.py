@@ -2,9 +2,10 @@ import argparse
 import datetime
 from urllib.parse import quote
 from logging import getLogger, DEBUG, INFO, basicConfig
-from flask import Flask, request
+from flask import Flask, request, render_template
 
 import db_read as db
+from lib import oauth
 
 app = Flask(__name__)
 logger = getLogger(__name__)
@@ -56,6 +57,26 @@ def get_recent():
         logger.debug(mes['message'])
     response = process_messages(messages, start_time)
     return response
+
+
+@app.route('/login')
+def login():
+    endpoint = oauth.get_authenticate_endpoint()
+    return render_template('login.html', endpoint=endpoint)
+
+
+@app.route('/user-page')
+def user_page():
+    oauth_token = request.args.get('oauth_token')
+    oauth_verifier = request.args.get('oauth_verifier')
+
+    access_token = oauth.get_access_token(oauth_token, oauth_verifier)
+    return '%s' % access_token
+
+
+@app.route('/api/new-token')
+def generate_neotter_token():
+    return 'test'
 
 
 def logging_config(debug=False):
