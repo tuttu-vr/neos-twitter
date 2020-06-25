@@ -17,7 +17,7 @@ request_token_url = f'{twitter_api_host}/oauth/request_token'
 authenticate_url = f'{twitter_api_host}/oauth/authenticate'
 access_token_url = f'{twitter_api_host}/oauth/access_token'
 
-oauth_callback = f'{NEOTTER_PROTO}://{NEOTTER_HOST_NAME}/user-page'
+oauth_callback = f'{NEOTTER_PROTO}://{NEOTTER_HOST_NAME}/register'
 
 
 def get_authenticate_endpoint():

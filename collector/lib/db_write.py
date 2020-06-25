@@ -27,6 +27,19 @@ create table users(
     client text
 )
 """
+table_neotter_users = """
+create table neotter_users(
+    id text primary key,
+    name text,
+    access_key text,
+    access_secret text,
+    session_id text,
+    client text,
+    token text,
+    expired text,
+    last_login text
+)
+"""
 
 def get_connection():
     return sqlite3.connect(db_path)
@@ -37,9 +50,10 @@ def migration():
     cur = con.cursor()
     cur.execute(table_messages)
     cur.execute(table_users)
+    cur.execute(table_neotter_users)
     con.commit()
     con.close()
-    logger.info('table messages created')
+    logger.info('tables created')
 
 
 def put_messages(messages):

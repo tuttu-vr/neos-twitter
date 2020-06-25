@@ -37,3 +37,15 @@ def get_recent_messages(count: int, offset: int, start_time: str):
     messages = _get_data(sql)
     logger.info(f'success getting {len(messages)} messages')
     return messages
+
+
+def get_neotter_user_by_session(session_id: str):
+    logger.info('getting neotter user')
+    sql = """
+        select *
+        from neotter_users
+        where session_id = '%s'
+    """ % session_id
+    result = _get_data(sql)
+
+    return None if len(result) == 0 else result[0]

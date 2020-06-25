@@ -1,11 +1,13 @@
+import os
+import sys
 import argparse
 import datetime
 from urllib.parse import quote
 from logging import getLogger, DEBUG, INFO, basicConfig
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for, session
 
 import db_read as db
-from lib import oauth
+from lib import oauth, db_write
 
 app = Flask(__name__)
 logger = getLogger(__name__)
@@ -65,13 +67,41 @@ def login():
     return render_template('login.html', endpoint=endpoint)
 
 
-@app.route('/user-page')
-def user_page():
+@app.route('/register')
+def register():
     oauth_token = request.args.get('oauth_token')
     oauth_verifier = request.args.get('oauth_verifier')
+    if not oauth_token:
+        return 'Invalid access'
 
-    access_token = oauth.get_access_token(oauth_token, oauth_verifier)
-    return '%s' % access_token
+    user_data = oauth.get_access_token(oauth_token, oauth_verifier)
+    logger.debug(user_data)
+    neotter_user = {
+        'id': user_data['user_id'],
+        'name': user_data['screen_name'],
+        'access_key': user_data['oauth_token'],
+        'access_secret': user_data['oauth_token_secret'],
+        'client': 'twitter'
+    }
+
+    session_id = db_write.register_user(neotter_user)
+    if session_id:
+        session['session_id'] = session_id
+        session['name'] = user_data['screen_name']
+        return redirect(url_for('user_page'))
+    else:
+        return 'Failed to register!'
+
+
+@app.route('/user-page')
+def user_page():
+    if 'session_id' in session:
+        user = db.get_neotter_user_by_session(session['session_id'])
+    else:
+        user = None
+    if not user:
+        return redirect(url_for('login'))
+    return 'Hello %s! Your token is %s!' % (user['name'], user['token'])
 
 
 @app.route('/api/new-token')
@@ -97,5 +127,11 @@ def get_arguments():
 if __name__ == '__main__':
     args = get_arguments()
     logging_config(args.debug)
+
+    secret_key = os.getenv('FLASK_SESSION_SECRET', None)
+    if not secret_key:
+        logger.error('Please set FLASK_SESSION_SECRET')
+        sys.exit(1)
+    app.secret_key = secret_key
 
     app.run(port=args.port, host=args.host, debug=args.debug)

@@ -54,6 +54,12 @@ BNF
 
 # memo
 
+## 6/25
+
+やること
+- neotter_user dbの作成
+- neotter_user dbへのput
+
 ## 4/12
 
 oauthによるログイン機能の追加に向けて
@@ -94,6 +100,9 @@ oauthによるログイン機能の追加に向けて
     - DBどうするか
 - DB設計
   - TBD
+- ログインセッションの維持
+  - 後回し可能
+  - 参考: https://qiita.com/ikaro1192/items/d890eefbdbbfe1460252
 
 ### クライアント(Neos)側
 
