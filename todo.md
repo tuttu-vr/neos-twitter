@@ -59,6 +59,12 @@ BNF
 やること
 - neotter_user dbの作成
 - neotter_user dbへのput
+- message tableにneotter_userを持たせる
+
+- message_idにneotter_idを結合
+  - putのみ考慮
+- messageにneotter_idを追加
+  - putもgetも考慮
 
 ## 4/12
 
@@ -194,6 +200,7 @@ oauthによるログイン機能の追加に向けて
 - common_settings
   - base dockerを用意して、そこからコピーする
 - message構造体を用意した方が良さそう
+- クローリングタスクをキューイングすることによる、スケーリング & 柔軟なクロールリクエスト
 
 # apiをどうするか
 

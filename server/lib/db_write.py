@@ -26,7 +26,7 @@ def register_user(user: dict):
 
     now = datetime.datetime.now()
     last_login = now.strftime(DATETIME_FORMAT)
-    expired = (now + datetime.timedelta(days=10000)).strftime(DATETIME_FORMAT)
+    expired = (now + datetime.timedelta(days=14)).strftime(DATETIME_FORMAT)
     user['last_login'] = last_login
     user['expired'] = expired
 

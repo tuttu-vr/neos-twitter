@@ -16,7 +16,8 @@ create table messages(
     attachments text,
     user_id text,
     created_datetime text,
-    client text
+    client text,
+    neotter_user_id text
 )
 """
 table_users = """
@@ -64,17 +65,20 @@ def put_messages(messages):
     for mes in messages:
         mes['created_datetime'] = mes['created_datetime'].strftime(DATETIME_FORMAT)
         try:
-            cur.execute("""replace into messages values(
+            sql = """replace into messages values(
                 '%(message_id)s',
                 '%(message)s',
                 '%(attachments)s',
                 '%(user_id)s',
                 '%(created_datetime)s',
-                '%(client)s'
-            )""" % mes)
+                '%(client)s',
+                '%(neotter_user_id)s'
+            )""" % mes
+            cur.execute(sql)
         except sqlite3.OperationalError as e:
             logger.error('failed to put a message')
-            logger.error(mes)
+            logger.error(sql)
+            logger.error(e)
             continue
     con.commit()
     con.close()
@@ -117,6 +121,24 @@ def delete_old_messages(hour_before: int=48):
     logger.info(f'deleting {count} messages')
     cur.execute(sql % 'delete')
     con.commit()
+    con.close()
+
+
+def delete_expired_users():
+    con = get_connection()
+    cur = con.cursor()
+
+    now = datetime.datetime.now().strftime(DATETIME_FORMAT)
+    sql = f"""
+        %s from neotter_users
+        where expired < '{now}'
+    """
+    cur.execute(sql % 'select count(*)')
+    count = cur.fetchone()[0]
+    if count > 0:
+        logger.info(f'deleting {count} users')
+        cur.execute(sql % 'delete')
+        con.commit()
     con.close()
 
 

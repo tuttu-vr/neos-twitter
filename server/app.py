@@ -8,6 +8,7 @@ from flask import Flask, request, render_template, redirect, url_for, session
 
 import db_read as db
 from lib import oauth, db_write
+from lib.session import validate_token
 
 app = Flask(__name__)
 logger = getLogger(__name__)
@@ -30,11 +31,18 @@ def process_messages(messages, start_time):
             quote(mes['name']),
             quote(mes['icon_url']),
             quote(mes['attachments']) if mes['attachments'] else '',
-            quote(mes['message'])
+            mes['message']
         ])
     text_list = [process_message(mes) for mes in messages]
     response = DELIMITER.join(text_list)
     return f'{start_time}|{len(text_list)}|{response}'
+
+
+def _get_user(token: str):
+    if not validate_token(token):
+        return None
+    user = db.get_neotter_user_by_token(token)
+    return user
 
 
 @app.route('/recent')
@@ -42,6 +50,10 @@ def get_recent():
     count      = request.args.get('count', default=3, type=int)
     offset     = request.args.get('offset', default=0, type=int)
     start_time = request.args.get('start_time', default=None, type=str)
+    user_token = request.args.get('key', default=None, type=str)
+    user = _get_user(user_token)
+    if not user:
+        return f'error: invalid token {user_token}'
     if not start_time:
         start_time_utc = (datetime.datetime.now(TIMEZONE_UTC) - datetime.timedelta(minutes=DEFAULT_BACKTIME_MINUTES))
         start_time = start_time_utc.astimezone(TIMEZONE_LOCAL).strftime(db.DATETIME_FORMAT)
@@ -54,7 +66,7 @@ def get_recent():
             # to avoid sql injection
             return f'error: start time format must be "{db.DATETIME_FORMAT}" but "{start_time}"'
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
-    messages = db.get_recent_messages(count, offset, start_time_utc.strftime(db.DATETIME_FORMAT))
+    messages = db.get_recent_messages(count, offset, start_time_utc.strftime(db.DATETIME_FORMAT), user['id'])
     for mes in messages:
         logger.debug(mes['message'])
     response = process_messages(messages, start_time)
@@ -101,7 +113,7 @@ def user_page():
         user = None
     if not user:
         return redirect(url_for('login'))
-    return 'Hello %s! Your token is %s!' % (user['name'], user['token'])
+    return 'Hello %s! Your token is %s ! (will expire in 14 days)' % (user['name'], user['token'])
 
 
 @app.route('/api/new-token')
