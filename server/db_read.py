@@ -24,7 +24,6 @@ def _get_data(sql: str):
 
 
 def get_recent_messages(count: int, offset: int, start_time: str, user_id: str):
-    # TODO user user_id(neotter_user_id)
     logger.info('getting messages')
     sql = f"""
         select
@@ -32,7 +31,9 @@ def get_recent_messages(count: int, offset: int, start_time: str, user_id: str):
             us.name, us.icon_url
         from messages as mes
         left join users as us using(user_id, client)
-        where mes.created_datetime >= '{start_time}'
+        where
+            mes.created_datetime >= '{start_time}'
+            and mes.neotter_user_id = '{user_id}'
         order by mes.created_datetime
         limit {count} offset {offset}
     """
