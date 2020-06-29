@@ -38,7 +38,9 @@ create table neotter_users(
     client text,
     token text,
     expired text,
-    last_login text
+    last_login text,
+    remote_addr text,
+    enable_ip_confirm integer default 1
 )
 """
 
@@ -101,6 +103,7 @@ def put_user(user_list):
         except sqlite3.OperationalError as e:
             logger.error('failed to put an user')
             logger.error(user)
+            logger.error(e)
             continue
     con.commit()
     con.close()

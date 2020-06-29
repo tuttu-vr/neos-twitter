@@ -8,7 +8,7 @@ from logging import getLogger, DEBUG, StreamHandler
 from dotenv import load_dotenv
 import twitter as tw
 
-from lib import db_write, db_read
+from lib import db_write, db_read, crypt
 
 logger = getLogger(__name__)
 logger.addHandler(StreamHandler())
@@ -108,7 +108,11 @@ TTL_HOUR_MESSAGES = 48
 
 def store_user_timeline(user):
     logger.info('getting timeline for %s' % user['name'])
-    api = get_twitter_api(user['access_key'], user['access_secret'])
+
+    access_key = crypt.decrypt(user['access_key'])
+    access_secret = crypt.decrypt(user['access_secret'])
+
+    api = get_twitter_api(access_key, access_secret)
     timeline = api.GetHomeTimeline(count=NUM_TIMELINE_GET_COUNT)
     logger.info('success getting timeline')
 
