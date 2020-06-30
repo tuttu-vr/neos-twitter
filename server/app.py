@@ -8,7 +8,7 @@ from flask import Flask, request, render_template, redirect, url_for, session
 
 import db_read as db
 from lib import oauth, db_write
-from lib.session import validate_token, generate_new_session
+from lib.session import validate_token, generate_new_session, validate_session_id
 from common.lib import crypt
 
 app = Flask(__name__)
@@ -125,7 +125,7 @@ def register():
 
 @app.route('/user-page')
 def user_page():
-    if 'session_id' in session:
+    if 'session_id' in session and validate_session_id(session['session_id']):
         user = db.get_neotter_user_by_session(session['session_id'])
     else:
         user = None
