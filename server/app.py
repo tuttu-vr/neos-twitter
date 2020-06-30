@@ -7,8 +7,9 @@ from logging import getLogger, DEBUG, INFO, basicConfig
 from flask import Flask, request, render_template, redirect, url_for, session
 
 import db_read as db
-from lib import oauth, db_write, crypt
+from lib import oauth, db_write
 from lib.session import validate_token, generate_new_session
+from common.lib import crypt
 
 app = Flask(__name__)
 logger = getLogger(__name__)

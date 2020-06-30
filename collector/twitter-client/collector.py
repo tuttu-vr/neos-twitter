@@ -8,7 +8,8 @@ from logging import getLogger, DEBUG, StreamHandler
 from dotenv import load_dotenv
 import twitter as tw
 
-from lib import db_write, db_read, crypt
+from lib import db_write, db_read
+from common.lib import crypt
 
 logger = getLogger(__name__)
 logger.addHandler(StreamHandler())
