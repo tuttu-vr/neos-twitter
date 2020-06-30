@@ -155,6 +155,19 @@ def get_arguments():
     return args
 
 
+def get_ssl_context():
+    SSL_KEY = os.getenv('SSL_KEY_PATH')
+    SSL_CERT = os.getenv('SSL_CERT_PATH')
+    if not SSL_CERT and os.getenv('APPLICATION_ENV') == 'production':
+        raise EnvironmentError('Error: No SSL with production')
+    if not SSL_CERT:
+        return
+    import ssl
+    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    context.load_cert_chain(SSL_CERT, SSL_KEY)
+    return context
+
+
 if __name__ == '__main__':
     args = get_arguments()
     logging_config(args.debug)
@@ -165,4 +178,12 @@ if __name__ == '__main__':
         sys.exit(1)
     app.secret_key = secret_key
 
-    app.run(port=args.port, host=args.host, debug=args.debug)
+    ssl_context = get_ssl_context()
+    run_args = {
+        'port': args.port,
+        'host': args.host,
+        'debug': args.debug,
+    }
+    if ssl_context:
+        run_args['ssl_context'] = ssl_context
+    app.run(**run_args)
