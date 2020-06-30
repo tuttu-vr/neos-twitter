@@ -2,7 +2,7 @@ FROM python:3.7-alpine3.11
 
 RUN apk update && \
     apk add --no-cache wget bash curl supervisor build-base pcre-dev \
-    supervisor \
+    build-base libffi-dev openssl openssl-dev \
     unzip jq
 
 # a tool for local execute
@@ -17,7 +17,7 @@ RUN install -d /var/log/supervisor/
 WORKDIR /app
 
 COPY ./requirements.txt ./
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY *.py ./src/
 COPY *.sh ./

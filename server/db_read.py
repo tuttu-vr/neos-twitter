@@ -1,4 +1,5 @@
 import sqlite3
+import datetime
 from logging import getLogger
 
 logger = getLogger(__name__)
@@ -22,7 +23,7 @@ def _get_data(sql: str):
     return data
 
 
-def get_recent_messages(count: int, offset: int, start_time: str):
+def get_recent_messages(count: int, offset: int, start_time: str, user_id: str):
     logger.info('getting messages')
     sql = f"""
         select
@@ -30,10 +31,39 @@ def get_recent_messages(count: int, offset: int, start_time: str):
             us.name, us.icon_url
         from messages as mes
         left join users as us using(user_id, client)
-        where mes.created_datetime >= '{start_time}'
+        where
+            mes.created_datetime >= '{start_time}'
+            and mes.neotter_user_id = '{user_id}'
         order by mes.created_datetime
         limit {count} offset {offset}
     """
     messages = _get_data(sql)
     logger.info(f'success getting {len(messages)} messages')
     return messages
+
+
+def get_neotter_user_by_session(session_id: str):
+    logger.info('getting neotter user')
+    sql = """
+        select *
+        from neotter_users
+        where session_id = '%s'
+    """ % session_id
+    result = _get_data(sql)
+
+    return None if len(result) == 0 else result[0]
+
+
+def get_neotter_user_by_token(token: str):
+    logger.info('getting neotter user by token')
+    sql = """
+        select *
+        from neotter_users
+        where
+            token = '%s'
+        and
+            expired >= '%s'
+    """ % (token, datetime.datetime.now().strftime(DATETIME_FORMAT))
+    result = _get_data(sql)
+
+    return None if len(result) == 0 else result[0]

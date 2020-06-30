@@ -2,20 +2,6 @@
 
 ## ソースコード側
 
-- [x] 一定期間経過したデータの自動破棄
-- [x] サーバーへのデプロイ
-  - CircleCI連携
-  - [x] CircleCIではなくgithub actionsに
-- テストを書く
-- [x] messageのフォーマットを再整理
-- [x] user dbを作成
-  - iconをdbに追加
-  - twitterのnameの形式を変更
-    - <screen_name>@<id>の形式に
-  - 画像をparseしやすい形式で追加
-    - dbにattachカラムを追加する？
-- [x] messageをencodeして送信するようにする
-
 - user dataの取得を可能に
 - tweet可能なentrypointを用意
 - ブラウザログインの実装
@@ -26,7 +12,7 @@
 ## LogiX側
 
 - 画像の表示
-- UIの整備
+- [x] UIの整備
 
 # 仕様
 
@@ -47,14 +33,13 @@
 
 - user_id: PK
 - name
-- display_id
 - icon_url
 - client
 
 ## response
 
 BNF
-
+```
 <response> := <datetime>"|"<num_of_messages>"|"<messages>
 <datetime> := "yyyy-mm-dd HH:MM:ss"
 <num_of_messages> := int
@@ -65,8 +50,88 @@ BNF
 <images>   := <image_url>[","<images>]
 <image_url>:= string (url encoded)
 <text>     := string (url encoded)
+```
 
 # memo
+
+## 6/30
+
+### テスト戦略
+
+- collector
+  - twitterのmockを作成し、適切にDBに格納されていること
+- web-server
+  - 適切なデータをもとに、適切なレスポンスを返却できること
+- その他
+  - ユーザーデータの適切な暗号化・複合化、検索ができること
+
+## 6/25
+
+やること
+- neotter_user dbの作成
+- neotter_user dbへのput
+- message tableにneotter_userを持たせる
+
+- message_idにneotter_idを結合
+  - putのみ考慮
+- messageにneotter_idを追加
+  - putもgetも考慮
+
+## 4/12
+
+oauthによるログイン機能の追加に向けて
+
+案
+- 期間限定のkeyを発行
+- Neos側でkeyからaccess keyを生成
+- ip制限
+  - ipは取得しようと思えば簡単に取得可能 & 偽装も可能のため却下
+  - と思ったけど、怪しいhostを許可しなければOKか
+- 暗号化
+  - logix自体をseedから自動生成し、他人からの読み取りを難しくする
+- 二段階認証する？
+
+### サーバー(現実)側
+
+- oauthの実験
+- ログイン画面
+  - サーバーサイド実装
+    - oauth認証
+      - id/passのvalidation(xss対策)
+      - ログインセッションの有効期限も設定しておく(一か月)
+        - Cookie周り
+    - ip判別
+      - https://qiita.com/se_fy/items/d5aee7e8eb74bc892843
+    - keyのリセット
+    - keyとaccess token/secretとの結びつけ
+    - user pageの閲覧可否判定
+  - フロントエンド実装
+    - 良さげなフレームワーク・ライブラリ探しておく
+    - 注意書き・導入方法は書いておく
+- callback画面
+  - 説明を書く
+- サーバのSSL化
+  - どのPaaSが良いか検討
+    - コスト
+    - docker使えるか
+    - DBどうするか
+- DB設計
+  - TBD
+- ログインセッションの維持
+  - 後回し可能
+  - 参考: https://qiita.com/ikaro1192/items/d890eefbdbbfe1460252
+
+### クライアント(Neos)側
+
+- Neos側のクライアントからkeyを取得されない方法を模索
+  - user-install型にするのはあり
+
+## 公開に向けて
+
+- 導入ドキュメントの用意
+  - Neos内・Webページ上共に
+- local viewとpublic viewの切り替えができるようにしたい
+- 英語ページ・インターフェイス・ドキュメントも用意したい
 
 ## 4/5
 
@@ -97,6 +162,21 @@ BNF
     - userをjoinして取得
     - その他変更部分
 
+
+- [x] 一定期間経過したデータの自動破棄
+- [x] サーバーへのデプロイ
+  - CircleCI連携
+  - [x] CircleCIではなくgithub actionsに
+- テストを書く
+- [x] messageのフォーマットを再整理
+- [x] user dbを作成
+  - iconをdbに追加
+  - twitterのnameの形式を変更
+    - <screen_name>@<id>の形式に
+  - 画像をparseしやすい形式で追加
+    - dbにattachカラムを追加する？
+- [x] messageをencodeして送信するようにする
+
 ## old
 
 - セッション的なものをどう管理するか
@@ -111,7 +191,7 @@ BNF
 1. 最新tweetを表示
   - flaskサーバー立てる
     - [x] local
-    - [ ] docker
+    - [x] docker
   - [x] 最新home tweet3つを取得するendpointを作成
   - [x] ngrokをdockerに入れ、環境変数で設定可能にする
 2. [x] 文字列分割を試す
@@ -131,6 +211,7 @@ BNF
 - common_settings
   - base dockerを用意して、そこからコピーする
 - message構造体を用意した方が良さそう
+- クローリングタスクをキューイングすることによる、スケーリング & 柔軟なクロールリクエスト
 
 # apiをどうするか
 
