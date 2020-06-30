@@ -13,11 +13,11 @@ services:
       context: server
     environment:
       APPLICATION_ARG: '--host 0.0.0.0'
+      APPLICATION_ENV: production
+      NEOTTER_HOST_NAME: tuttuvr.work
     depends_on:
       - collector
     ports:
       - 80:80
     volumes:
       - /var/db/neos-twitter:/app/data
-    environment:
-      - NEOTTER_HOST_NAME=tuttuvr.work

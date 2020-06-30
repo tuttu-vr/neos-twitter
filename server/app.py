@@ -130,7 +130,6 @@ def user_page():
     else:
         user = None
     if not user:
-        logger.debug(session['session_id'])
         return redirect(url_for('login'))
     return 'Hello %s! Your token is %s ! (will expire in 14 days)' \
         % (user['name'], user['token'])
