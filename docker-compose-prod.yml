@@ -19,3 +19,5 @@ services:
       - 80:80
     volumes:
       - /var/db/neos-twitter:/app/data
+    environment:
+      - NEOTTER_HOST_NAME=tuttuvr.work
