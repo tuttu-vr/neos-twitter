@@ -15,8 +15,12 @@ def generate_token():
     return secrets.token_urlsafe(8)
 
 
+def validate_session_id(session_id: str):
+    return re.fullmatch(r'[a-zA-Z0-9\-]+', session_id)
+
+
 def validate_token(token: str):
-    return re.fullmatch(r'[a-zA-Z0-9]+', token)
+    return re.fullmatch(r'[a-zA-Z0-9_\.\-\~]+', token)
 
 
 def generate_new_session():

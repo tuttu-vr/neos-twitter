@@ -17,6 +17,7 @@ jobs:
       run: |
         mv docker-compose-prod.yml docker-compose.yml
         touch collector/.env
+        touch server/.env
         ./build.sh
     - name: Push the Docker images
       if: github.event_name == 'push'

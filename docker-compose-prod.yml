@@ -11,13 +11,18 @@ services:
     image: tuttuvr/message-api:${TAG}
     build:
       context: server
+    env_file: server/.env
     environment:
-      APPLICATION_ARG: '--host 0.0.0.0'
+      APPLICATION_ARG: '--host 0.0.0.0 --port 443'
       APPLICATION_ENV: production
       NEOTTER_HOST_NAME: tuttuvr.work
+      NEOTTER_PROTO: https
+      SSL_CERT_PATH: /cert/cert.pem
+      SSL_KEY_PATH: /cert/key.pem
     depends_on:
       - collector
     ports:
-      - 80:80
+      - 443:443
     volumes:
       - /var/db/neos-twitter:/app/data
+      - /var/neos-twitter/cert:/cert
