@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 import datetime
+import traceback
 from urllib.parse import quote
 from logging import getLogger, DEBUG, INFO, basicConfig
 from flask import Flask, request, render_template, redirect, url_for, session
@@ -28,14 +29,20 @@ def _process_messages(messages, start_time):
     def process_message(mes):
         utc_time = datetime.datetime.strptime(mes['created_datetime'], db.DATETIME_FORMAT)
         local_time_str = utc_time.astimezone(TIMEZONE_LOCAL).strftime(db.DATETIME_FORMAT)
-        return ';'.join([
-            quote(local_time_str),
-            quote(mes['name']),
-            quote(mes['icon_url']),
-            quote(mes['attachments']) if mes['attachments'] else '',
-            mes['message']
-        ])
-    text_list = [process_message(mes) for mes in messages]
+        try:
+            return ';'.join([
+                quote(local_time_str),
+                quote(mes['name']),
+                quote(mes['icon_url']),
+                quote(mes['attachments']) if mes['attachments'] else '',
+                mes['message']
+            ])
+        except TypeError:
+            logger.error(traceback.format_exc())
+            for key in mes.keys():
+                logger.error('%s=%s' % (key, str(mes[key])))
+            return None
+    text_list = list(filter(lambda x: x, [process_message(mes) for mes in messages]))
     response = DELIMITER.join(text_list)
     return f'{start_time}|{len(text_list)}|{response}'
 

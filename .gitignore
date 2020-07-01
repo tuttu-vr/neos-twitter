@@ -9,3 +9,4 @@
 
 *.sqlite3
 deploy.sh
+*.log
