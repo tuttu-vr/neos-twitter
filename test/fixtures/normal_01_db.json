@@ -1,0 +1,94 @@
+{
+    "messages": [
+        {
+            "insert": true,
+            "message_id": "01-1001",
+            "message": "こんにちは！",
+            "attachments": "",
+            "user_id": "01",
+            "created_datetime": "2020-07-03 15:00:00",
+            "client": "twitter",
+            "neotter_user_id": "01"
+        },
+        {
+            "insert": true,
+            "message_id": "02-1001",
+            "message": "こんにちは！",
+            "attachments": "",
+            "user_id": "01",
+            "created_datetime": "2020-07-03 15:00:00",
+            "client": "twitter",
+            "neotter_user_id": "02"
+        },
+        {
+            "insert": false,
+            "message_id": "01-1002",
+            "message": "RT : これはリツイートです",
+            "attachments": "",
+            "user_id": "02",
+            "created_datetime": "2020-07-03 15:01:00",
+            "client": "twitter",
+            "neotter_user_id": "01"
+        },
+        {
+            "insert": true,
+            "message_id": "01-1003",
+            "message": "記号テスト^~@#$&%!\"',.*[]():;/<> 　\\記号テスト",
+            "attachments": "",
+            "user_id": "03",
+            "created_datetime": "2020-07-03 15:02:00",
+            "client": "twitter",
+            "neotter_user_id": "01"
+        },
+        {
+            "insert": true,
+            "message_id": "01-1004",
+            "message": "test text :)",
+            "attachments": "",
+            "user_id": "02",
+            "created_datetime": "2020-07-03 15:03:00",
+            "client": "twitter",
+            "neotter_user_id": "01"
+        },
+        {
+            "insert": true,
+            "message_id": "02-1005",
+            "message": "hello",
+            "attachments": "",
+            "user_id": "04",
+            "created_datetime": "2020-07-03 15:33:00",
+            "client": "twitter",
+            "neotter_user_id": "02"
+        }
+    ],
+    "users": [
+        {
+            "insert": true,
+            "user_id": "01",
+            "name": "はろ@id_3232_haro",
+            "icon_url": "https://pbs.twimg.com/profile_images/1228677608545538048/Tcguv7Tw_400x400.jpg",
+            "client": "twitter"
+        },
+        {
+            "insert": true,
+            "user_id": "02",
+            "name": "tuttu@testtest",
+            "icon_url": "https://placehold.jp/400x400.png",
+            "client": "twitter"
+        },
+        {
+            "insert": true,
+            "user_id": "03",
+            "name": "記号^~@#$&%!\"',.*[]():;/<> 　\\記号@__",
+            "icon_url": "",
+            "client": "twitter"
+        },
+        {
+            "insert": true,
+            "user_id": "04",
+            "name": "nunnu@nunnun",
+            "icon_url": "https://placehold.jp/400x400.png",
+            "client": "twitter"
+        }
+    ]
+}
