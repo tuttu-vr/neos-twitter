@@ -9,4 +9,4 @@ if [ ! -e $FILE ]; then
   python src/lib/db_write.py
 fi
 
-PYTHONPATH=src python src/${CLIENT_NAME}-client/collector.py
+PYTHONPATH=src python src/${CLIENT_NAME}_client/collector.py

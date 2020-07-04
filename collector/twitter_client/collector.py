@@ -67,10 +67,14 @@ def tweet_to_dict(tweet, neotter_user_id):
     return tweet_dic
 
 
+def escape_quote(text: str):
+    return text.replace("'", "''")
+
+
 def user_to_dict(user):
     return {
         'user_id': user.id_str,
-        'name': f'{user.name}@{user.screen_name}',
+        'name': f'{escape_quote(user.name)}@{user.screen_name}',
         'icon_url': user.profile_image_url_https,
         'client': 'twitter'
     }
@@ -107,7 +111,7 @@ NUM_TIMELINE_GET_COUNT = 100
 TTL_HOUR_MESSAGES = 48
 
 
-def store_user_timeline(user):
+def get_user_timeline(user):
     logger.info('getting timeline for %s' % user['name'])
 
     access_key = crypt.decrypt(user['access_key'])
@@ -116,9 +120,12 @@ def store_user_timeline(user):
     api = get_twitter_api(access_key, access_secret)
     timeline = api.GetHomeTimeline(count=NUM_TIMELINE_GET_COUNT)
     logger.info('success getting timeline')
+    return timeline
 
+
+def store_timeline(timeline: list, user_id: str):
     logger.debug(f'Got {len(timeline)} tweets')
-    tweet_list, user_list = extract_timeline(timeline, user['id'])
+    tweet_list, user_list = extract_timeline(timeline, user_id)
     processed_tweet_list = tweet_pipeline(tweet_list)
     processed_user_list = user_pipeline(user_list)
     db_write.put_messages(processed_tweet_list)
@@ -130,7 +137,8 @@ def main():
         try:
             users = db_read.get_valid_neotter_users()
             for user in users:
-                store_user_timeline(user)
+                timeline = get_user_timeline(user)
+                store_timeline(timeline, user['id'])
             db_write.delete_old_messages(hour_before=TTL_HOUR_MESSAGES)
             time.sleep(90)
         except KeyboardInterrupt as e:

@@ -1,3 +1,4 @@
+from common import configs
 import sqlite3
 import datetime
 from logging import getLogger, DEBUG, StreamHandler
@@ -6,8 +7,8 @@ logger = getLogger(__name__)
 logger.addHandler(StreamHandler())
 logger.setLevel(DEBUG)
 
-db_path = 'data/db.sqlite3'
-DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+db_path = configs.db_path
+DATETIME_FORMAT = configs.datetime_format
 
 
 def get_connection():

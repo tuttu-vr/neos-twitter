@@ -1,0 +1,78 @@
+{
+    "01": [
+        {
+            "id": 1001,
+            "text": "こんにちは！",
+            "media": [],
+            "user": {
+                "id_str": "01",
+                "name": "はろ",
+                "screen_name": "id_3232_haro",
+                "profile_image_url_https": "https://pbs.twimg.com/profile_images/1228677608545538048/Tcguv7Tw_400x400.jpg"
+            },
+            "created_at": "Fri Jul 03 15:00:00 +0000 2020"
+        },
+        {
+            "id": 1002,
+            "text": "RT : これはリツイートです",
+            "media": [],
+            "user": {
+                "id_str": "02",
+                "name": "tuttu",
+                "screen_name": "testtest",
+                "profile_image_url_https": "https://placehold.jp/400x400.png"
+            },
+            "created_at": "Fri Jul 03 15:01:00 +0000 2020"
+        },
+        {
+            "id": 1003,
+            "text": "記号テスト^~@#$&%!\"',.*[]():;/<> 　\\記号テスト",
+            "media": [],
+            "user": {
+                "id_str": "03",
+                "name": "記号^~@#$&%!\"',.*[]():;/<> 　\\記号",
+                "screen_name": "__",
+                "profile_image_url_https": ""
+            },
+            "created_at": "Fri Jul 03 15:02:00 +0000 2020"
+        },
+        {
+            "id": 1004,
+            "text": "test text :)",
+            "media": [],
+            "user": {
+                "id_str": "02",
+                "name": "tuttu",
+                "screen_name": "testtest",
+                "profile_image_url_https": "https://placehold.jp/400x400.png"
+            },
+            "created_at": "Fri Jul 03 15:03:00 +0000 2020"
+        }
+    ],
+    "02": [
+        {
+            "id": 1001,
+            "text": "こんにちは！",
+            "media": [],
+            "user": {
+                "id_str": "01",
+                "name": "はろ",
+                "screen_name": "id_3232_haro",
+                "profile_image_url_https": "https://pbs.twimg.com/profile_images/1228677608545538048/Tcguv7Tw_400x400.jpg"
+            },
+            "created_at": "Fri Jul 03 15:00:00 +0000 2020"
+        },
+        {
+            "id": 1005,
+            "text": "hello",
+            "media": [],
+            "user": {
+                "id_str": "04",
+                "name": "nunnu",
+                "screen_name": "nunnun",
+                "profile_image_url_https": "https://placehold.jp/400x400.png"
+            },
+            "created_at": "Fri Jul 03 15:33:00 +0000 2020"
+        }
+    ]
+}
