@@ -14,7 +14,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        for req in $(find ./ -name requirements.txt);do;echo $req;done
+        cd test
+        ./init.sh
     - name: Test
       run: |
         cd test
