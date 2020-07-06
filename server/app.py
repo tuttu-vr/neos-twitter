@@ -1,18 +1,18 @@
 import os
 import sys
-import argparse
 import datetime
 import traceback
 from urllib.parse import quote
-from logging import getLogger, DEBUG, INFO, basicConfig
-from flask import Flask, request, render_template, redirect, url_for, session
+from logging import getLogger, DEBUG, INFO
+from flask import request, render_template, redirect, url_for, session
 
 import db_read as db
 from lib import oauth, db_write
 from lib.session import validate_token, generate_new_session, validate_session_id
+from lib.settings import logging_config, get_arguments, CustomFlask
 from common.lib import crypt
 
-app = Flask(__name__)
+app = CustomFlask(__name__)
 logger = getLogger(__name__)
 
 
@@ -145,21 +145,6 @@ def user_page():
 @app.route('/api/new-token')
 def generate_neotter_token():
     return 'test'
-
-
-def logging_config(debug=False):
-    _format = '[%(asctime)s %(levelname)s %(name)s]: %(message)s'
-    log_level = INFO if not debug else DEBUG
-    basicConfig(level=log_level, format=_format)
-
-
-def get_arguments():
-    parser = argparse.ArgumentParser(description='This is personal twitter api.')
-    parser.add_argument('--debug', action='store_true', help='enable debug mode')
-    parser.add_argument('--host', default='localhost', help='specify host name')
-    parser.add_argument('--port', type=int, default=80, help='specify port')
-    args = parser.parse_args()
-    return args
 
 
 def get_ssl_context():
