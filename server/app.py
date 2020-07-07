@@ -5,15 +5,15 @@ import traceback
 from requests.exceptions import ConnectionError
 from urllib.parse import quote
 from logging import getLogger, DEBUG, INFO
-from flask import request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, url_for, session
 
 import db_read as db
 from lib import oauth, db_write
 from lib.session import validate_token, generate_new_session, validate_session_id
-from lib.settings import logging_config, get_arguments, CustomFlask
+from lib.settings import logging_config, get_arguments
 from common.lib import crypt
 
-app = CustomFlask(__name__)
+app = Flask(__name__)
 logger = getLogger(__name__)
 
 
@@ -23,6 +23,10 @@ DEFAULT_BACKTIME_MINUTES = 30
 
 TIMEZONE_LOCAL = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
 TIMEZONE_UTC = datetime.timezone(datetime.timedelta(hours=+0), 'UTC')
+
+
+def gettext(text: str):
+    return text
 
 
 def _process_messages(messages, start_time):
@@ -100,7 +104,18 @@ def login():
     except ConnectionError:
         logger.error(traceback.format_exc())
         return 'Failed to access twitter. Please try again later.', 503
-    return render_template('login.html', endpoint=endpoint, title='Neotter login')
+    text = {
+        'twitter_integration': 'Twitter連携する'
+    }
+    return render_template('login.html', endpoint=endpoint, title='Neotter login', text=text)
+
+
+@app.route('/login-test')
+def login_test():
+    text = {
+        'twitter_integration': 'Twitter連携する'
+    }
+    return render_template('login.html', endpoint='test', title='Neotter login', text=text)
 
 
 @app.route('/register')
@@ -138,13 +153,16 @@ def register():
 @app.route('/user-page')
 def user_page():
     if 'session_id' in session and validate_session_id(session['session_id']):
-        user = db.get_neotter_user_by_session(session['session_id'])
+        user_data = db.get_neotter_user_by_session(session['session_id'])
     else:
-        user = None
-    if not user:
+        user_data = None
+    if not user_data:
         return redirect(url_for('login'))
-    return 'Hello %s! Your token is %s ! (will expire in 14 days)' \
-        % (user['name'], user['token'])
+    user = {
+        'name': user_data['name'],
+        'token': user_data['token']
+    }
+    return render_template('user-page.html', user=user)
 
 
 @app.route('/api/new-token')

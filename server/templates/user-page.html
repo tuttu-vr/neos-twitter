@@ -1,0 +1,22 @@
+{% extends "template.html" %}
+{% block body %}
+<main>
+    <section class="uk-section uk-section-small">
+        <div class="uk-container uk-container-small uk-section-small uk-box-shadow-medium">
+            <h1>Neotter認証トークン</h1>
+            こんにちは、{{user.name}}さん<br/>
+            こちらのトークンをNeotterに貼り付けてください
+            <div  class="uk-section uk-section-small">
+                <div class="uk-container uk-container-default" uk-grid>
+                    <div class="uk-flex uk-flex-center uk-width-2-3">
+                        <input id="token-input" class="uk-input" type="text" value="{{user.token}}" readonly>
+                    </div>
+                    <div class="uk-width-1-3">
+                        <button class="uk-button uk-button-primary" value="token-input" onclick="copyToClipboard(this, this.value)">copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
