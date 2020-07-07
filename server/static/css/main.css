@@ -1,0 +1,14 @@
+header {
+    padding: 0 30px;
+}
+header > .logo > img{
+    height: 45px;
+}
+main {
+    padding: 0 30px;
+}
+#button-icon {
+    width: 40px;
+    height: auto;
+    margin: 10px 10px 10px 0;
+}

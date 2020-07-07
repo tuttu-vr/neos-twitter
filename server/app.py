@@ -1,15 +1,16 @@
 import os
 import sys
-import argparse
 import datetime
 import traceback
+from requests.exceptions import ConnectionError
 from urllib.parse import quote
-from logging import getLogger, DEBUG, INFO, basicConfig
+from logging import getLogger, DEBUG, INFO
 from flask import Flask, request, render_template, redirect, url_for, session
 
 import db_read as db
 from lib import oauth, db_write
 from lib.session import validate_token, generate_new_session, validate_session_id
+from lib.settings import logging_config, get_arguments
 from common.lib import crypt
 
 app = Flask(__name__)
@@ -83,7 +84,7 @@ def get_recent():
         user = _get_user(user_token, request.remote_addr)
         start_time, start_time_utc = _get_start_time(start_time)
     except ValueError as e:
-        return str(e)
+        return str(e), 400
 
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
 
@@ -94,8 +95,12 @@ def get_recent():
 
 @app.route('/login')
 def login():
-    endpoint = oauth.get_authenticate_endpoint()
-    return render_template('login.html', endpoint=endpoint)
+    try:
+        endpoint = oauth.get_authenticate_endpoint()
+    except ConnectionError:
+        logger.error(traceback.format_exc())
+        return 'Failed to access twitter. Please try again later.', 503
+    return render_template('login.html', endpoint=endpoint, title='Neotter login')
 
 
 @app.route('/register')
@@ -103,7 +108,7 @@ def register():
     oauth_token = request.args.get('oauth_token')
     oauth_verifier = request.args.get('oauth_verifier')
     if not oauth_token:
-        return 'Invalid access'
+        return 'Invalid access', 401
 
     user_data = oauth.get_access_token(oauth_token, oauth_verifier)
     logger.debug(user_data)
@@ -122,7 +127,7 @@ def register():
     try:
         db_write.register_user(neotter_user)
     except ValueError as e:
-        return str(e)
+        return str(e), 503
     session_id = new_session_info['session_id']
     session['session_id'] = session_id
     session['name'] = user_data['screen_name']
@@ -133,33 +138,21 @@ def register():
 @app.route('/user-page')
 def user_page():
     if 'session_id' in session and validate_session_id(session['session_id']):
-        user = db.get_neotter_user_by_session(session['session_id'])
+        user_data = db.get_neotter_user_by_session(session['session_id'])
     else:
-        user = None
-    if not user:
+        user_data = None
+    if not user_data:
         return redirect(url_for('login'))
-    return 'Hello %s! Your token is %s ! (will expire in 14 days)' \
-        % (user['name'], user['token'])
+    user = {
+        'name': user_data['name'],
+        'token': user_data['token']
+    }
+    return render_template('user-page.html', user=user)
 
 
 @app.route('/api/new-token')
 def generate_neotter_token():
     return 'test'
-
-
-def logging_config(debug=False):
-    _format = '[%(asctime)s %(levelname)s %(name)s]: %(message)s'
-    log_level = INFO if not debug else DEBUG
-    basicConfig(level=log_level, format=_format)
-
-
-def get_arguments():
-    parser = argparse.ArgumentParser(description='This is personal twitter api.')
-    parser.add_argument('--debug', action='store_true', help='enable debug mode')
-    parser.add_argument('--host', default='localhost', help='specify host name')
-    parser.add_argument('--port', type=int, default=80, help='specify port')
-    args = parser.parse_args()
-    return args
 
 
 def get_ssl_context():
