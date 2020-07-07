@@ -26,3 +26,9 @@ jobs:
         docker-compose push
         TAG=latest docker-compose build
         TAG=latest docker-compose push
+    - name: Slack Notification
+      uses: rtCamp/action-slack-notify@v2.0.2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_USERNAME: Github Actions notification
+        SLACK_MESSAGE: Finished docker build action
