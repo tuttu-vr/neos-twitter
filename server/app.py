@@ -2,6 +2,7 @@ import os
 import sys
 import datetime
 import traceback
+from requests.exceptions import ConnectionError
 from urllib.parse import quote
 from logging import getLogger, DEBUG, INFO
 from flask import request, render_template, redirect, url_for, session
@@ -83,7 +84,7 @@ def get_recent():
         user = _get_user(user_token, request.remote_addr)
         start_time, start_time_utc = _get_start_time(start_time)
     except ValueError as e:
-        return str(e)
+        return str(e), 400
 
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
 
@@ -94,8 +95,12 @@ def get_recent():
 
 @app.route('/login')
 def login():
-    endpoint = oauth.get_authenticate_endpoint()
-    return render_template('login.html', endpoint=endpoint)
+    try:
+        endpoint = oauth.get_authenticate_endpoint()
+    except ConnectionError:
+        logger.error(traceback.format_exc())
+        return 'Failed to access twitter. Please try again later.', 503
+    return render_template('login.html', endpoint=endpoint, title='Neotter login')
 
 
 @app.route('/register')
@@ -103,7 +108,7 @@ def register():
     oauth_token = request.args.get('oauth_token')
     oauth_verifier = request.args.get('oauth_verifier')
     if not oauth_token:
-        return 'Invalid access'
+        return 'Invalid access', 401
 
     user_data = oauth.get_access_token(oauth_token, oauth_verifier)
     logger.debug(user_data)
@@ -122,7 +127,7 @@ def register():
     try:
         db_write.register_user(neotter_user)
     except ValueError as e:
-        return str(e)
+        return str(e), 503
     session_id = new_session_info['session_id']
     session['session_id'] = session_id
     session['name'] = user_data['screen_name']
