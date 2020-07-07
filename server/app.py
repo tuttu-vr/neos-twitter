@@ -25,10 +25,6 @@ TIMEZONE_LOCAL = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
 TIMEZONE_UTC = datetime.timezone(datetime.timedelta(hours=+0), 'UTC')
 
 
-def gettext(text: str):
-    return text
-
-
 def _process_messages(messages, start_time):
     # TODO process have to be into Message class
     def process_message(mes):
@@ -104,18 +100,7 @@ def login():
     except ConnectionError:
         logger.error(traceback.format_exc())
         return 'Failed to access twitter. Please try again later.', 503
-    text = {
-        'twitter_integration': 'Twitter連携する'
-    }
-    return render_template('login.html', endpoint=endpoint, title='Neotter login', text=text)
-
-
-@app.route('/login-test')
-def login_test():
-    text = {
-        'twitter_integration': 'Twitter連携する'
-    }
-    return render_template('login.html', endpoint='test', title='Neotter login', text=text)
+    return render_template('login.html', endpoint=endpoint, title='Neotter login')
 
 
 @app.route('/register')
