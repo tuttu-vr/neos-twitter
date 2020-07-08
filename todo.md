@@ -43,11 +43,11 @@ BNF
 <response> := <datetime>"|"<num_of_messages>"|"<messages>
 <datetime> := "yyyy-mm-dd HH:MM:ss"
 <num_of_messages> := int
-<messages> := <message>["$"<messages>]
+<messages> := <message>{"$"<messages>}
 <message>  := <datetime>";"<name>";"<icon_url>";"<images>";"<text>
 <name>     := string (url encoded)
 <icon_url> := string (url encoded)
-<images>   := <image_url>[","<images>]
+<images>   := <image_url>{","<images>}
 <image_url>:= string (url encoded)
 <text>     := string (url encoded)
 ```

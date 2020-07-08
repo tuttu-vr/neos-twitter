@@ -1,8 +1,7 @@
-FROM python:3.7-alpine3.11
+FROM python:3.7
 
-RUN apk update && \
-    apk add --no-cache wget bash curl supervisor build-base pcre-dev \
-    build-base libffi-dev openssl openssl-dev \
+RUN apt update -y && \
+    apt install -y wget bash curl supervisor libffi-dev libssl-dev \
     unzip jq
 
 # a tool for local execute
