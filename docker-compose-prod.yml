@@ -13,16 +13,19 @@ services:
       context: server
     env_file: server/.env
     environment:
-      APPLICATION_ARG: '--host 0.0.0.0 --port 443'
+      APPLICATION_ARG: '--host 0.0.0.0'
       APPLICATION_ENV: production
       NEOTTER_HOST_NAME: tuttuvr.work
-      NEOTTER_PROTO: https
-      SSL_CERT_PATH: /cert/cert.pem
-      SSL_KEY_PATH: /cert/key.pem
     depends_on:
       - collector
     ports:
-      - 443:443
+      - 8080:80
     volumes:
       - /var/db/neos-twitter:/app/data
-      - /var/neos-twitter/cert:/cert
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure

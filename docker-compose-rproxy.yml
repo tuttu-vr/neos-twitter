@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  reverse-proxy:
+    image: tuttuvr/local-proxy:${TAG}
+    build:
+      context: proxy
+    volumes:
+      - /var/neos-twitter/cert:/cert
+    expose:
+      - 443
+    network_mode: "host"

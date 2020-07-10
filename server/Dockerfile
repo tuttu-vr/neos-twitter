@@ -1,7 +1,8 @@
-FROM python:3.7
+FROM python:3.7-alpine3.11
 
-RUN apt update -y && \
-    apt install -y wget bash curl supervisor libffi-dev libssl-dev \
+RUN apk update && \
+    apk add --no-cache wget bash curl supervisor build-base pcre-dev \
+    build-base libffi-dev openssl openssl-dev \
     unzip jq
 
 # a tool for local execute
@@ -21,6 +22,8 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY ./ ./src/
 RUN mv ./src/*.sh ./
 
-EXPOSE 80
+EXPOSE 8080
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=2 CMD ./healthcheck.sh
 
 CMD [ "supervisord", "-c", "/etc/supervisord.conf" ]
