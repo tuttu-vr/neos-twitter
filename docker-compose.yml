@@ -19,4 +19,4 @@ services:
       - ./server:/app/src
       - ./data:/app/data
     ports:
-        - 80:80
+        - 8080:80

@@ -19,13 +19,17 @@ jobs:
         touch collector/.env
         touch server/.env
         ./build.sh
+        docker-compose -f docker-compose-rproxy.yml build
     - name: Push the Docker images
       if: github.event_name == 'push'
       run: |
         docker login --username="${{ secrets.DOCKER_HUB_NAME }}" --password="${{ secrets.DOCKER_HUB_PASS }}"
         docker-compose push
+        docker-compose -f docker-compose-rproxy.yml push
         TAG=latest docker-compose build
         TAG=latest docker-compose push
+        TAG=latest docker-compose -f docker-compose-rproxy.yml build
+        TAG=latest docker-compose -f docker-compose-rproxy.yml push
     - name: Slack Notification
       uses: rtCamp/action-slack-notify@v2.0.2
       env:
