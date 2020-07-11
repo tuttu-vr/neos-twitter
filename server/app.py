@@ -59,6 +59,18 @@ def _get_user(token: str, remote_addr: str):
     return user
 
 
+def _get_remote_addr(request):
+    logger.debug(request.remote_addr)
+    logger.debug(request.headers.get('X-Real-IP'))
+    if os.getenv('APPLICATION_ENV') == 'production':
+        remote_addr = request.headers.get('X-Real-IP')
+        if not remote_addr:
+            raise EnvironmentError('X-Real-IP must be set in production')
+    else:
+        remote_addr = request.remote_addr
+    return remote_addr
+
+
 def _get_start_time(start_time: str):
     if not start_time:
         start_time_utc = (datetime.datetime.now(TIMEZONE_UTC) - datetime.timedelta(minutes=DEFAULT_BACKTIME_MINUTES))
@@ -81,7 +93,7 @@ def get_recent():
     start_time = request.args.get('start_time', default=None, type=str)
     user_token = request.args.get('key', default=None, type=str)
     try:
-        user = _get_user(user_token, request.remote_addr)
+        user = _get_user(user_token, _get_remote_addr(request))
         start_time, start_time_utc = _get_start_time(start_time)
     except ValueError as e:
         return str(e), 400
@@ -118,7 +130,7 @@ def register():
         'access_key': crypt.encrypt(user_data['oauth_token']),
         'access_secret': crypt.encrypt(user_data['oauth_token_secret']),
         'client': 'twitter',
-        'remote_addr': crypt.encrypt(request.remote_addr)
+        'remote_addr': crypt.encrypt(_get_remote_addr(request))
     }
 
     new_session_info = generate_new_session()
