@@ -20,7 +20,7 @@ def validate_session_id(session_id: str):
 
 
 def validate_token(token: str):
-    return re.fullmatch(r'[a-zA-Z0-9_\.\-\~]+', token)
+    return token and re.fullmatch(r'[a-zA-Z0-9_\.\-\~]+', token)
 
 
 def generate_new_session():
