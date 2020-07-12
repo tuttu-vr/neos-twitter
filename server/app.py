@@ -10,14 +10,14 @@ from flask import Flask, request, render_template, redirect, url_for, session
 import db_read as db
 from lib import oauth, db_write
 from lib.session import validate_token, generate_new_session, validate_session_id
-from lib.settings import logging_config, get_arguments
+from lib.settings import logging_config, get_arguments, TWEET_DELIMITER
 from common.lib import crypt
 
 app = Flask(__name__)
 logger = getLogger(__name__)
 
 
-DELIMITER = '$'
+DELIMITER = TWEET_DELIMITER
 
 DEFAULT_BACKTIME_MINUTES = 30
 
@@ -159,7 +159,7 @@ def user_page():
         'name': user_data['name'],
         'token': user_data['token']
     }
-    return render_template('user-page.html', user=user)
+    return render_template('user-page.html', user=user, title='Neotter user page')
 
 
 @app.route('/api/new-token')

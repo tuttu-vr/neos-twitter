@@ -7,7 +7,7 @@ parser.add_argument('token')
 parser.add_argument('count', default=3, type=int)
 args = parser.parse_args()
 
-res = requests.get('http://localhost/recent', {
+res = requests.get('http://localhost:8080/recent', {
     'key': args.token,
     'count': args.count
 })

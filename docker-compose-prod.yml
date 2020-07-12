@@ -16,6 +16,7 @@ services:
       APPLICATION_ARG: '--host 0.0.0.0'
       APPLICATION_ENV: production
       NEOTTER_HOST_NAME: tuttuvr.work
+      NEOTTER_PROTO: https
     depends_on:
       - collector
     ports:

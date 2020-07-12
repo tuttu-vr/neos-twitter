@@ -1,11 +1,12 @@
 import sqlite3
 import datetime
 from logging import getLogger
+from lib.settings import DATETIME_FORMAT
 
 logger = getLogger(__name__)
 
 db_path = 'data/db.sqlite3'
-DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+DATETIME_FORMAT = DATETIME_FORMAT
 
 
 def get_connection():

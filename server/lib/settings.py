@@ -3,6 +3,10 @@ from logging import basicConfig, DEBUG, INFO
 from flask import Flask
 
 
+TWEET_DELIMITER = '$'
+DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
     jinja_options.update(dict(

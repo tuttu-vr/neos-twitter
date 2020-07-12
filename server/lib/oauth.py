@@ -11,13 +11,17 @@ CONSUMER_SECRET = os.getenv('TWITTER_CONSUMER_SECRET', '')
 
 NEOTTER_HOST_NAME = os.getenv('NEOTTER_HOST_NAME', 'localhost')
 NEOTTER_PROTO = os.getenv('NEOTTER_PROTO', 'http')
+NEOTTER_PORT = os.getenv('NEOTTER_SERVER_PORT')
+
+if NEOTTER_PORT:
+    NEOTTER_PORT = ':' + NEOTTER_PORT
 
 twitter_api_host = 'https://api.twitter.com'
 request_token_url = f'{twitter_api_host}/oauth/request_token'
 authenticate_url = f'{twitter_api_host}/oauth/authenticate'
 access_token_url = f'{twitter_api_host}/oauth/access_token'
 
-oauth_callback = f'{NEOTTER_PROTO}://{NEOTTER_HOST_NAME}/register'
+oauth_callback = f'{NEOTTER_PROTO}://{NEOTTER_HOST_NAME}{NEOTTER_PORT}/register'
 
 
 def get_authenticate_endpoint():
