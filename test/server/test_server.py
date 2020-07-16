@@ -21,6 +21,7 @@ from test_utils import fixture, db as test_db
 
 
 TIMEZONE_JST = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
+TIMEZONE_UTC = datetime.timezone(datetime.timedelta(hours=+0), 'UTC')
 
 
 def _parse_response(response: str):
@@ -29,7 +30,7 @@ def _parse_response(response: str):
     messages = []
     parsed = {
         'datetime': datetime.datetime.strptime(data[0], DATETIME_FORMAT)
-            .replace(tzinfo=TIMEZONE_JST).strftime(DATETIME_FORMAT),
+            .replace(tzinfo=TIMEZONE_JST).astimezone(TIMEZONE_UTC).strftime(DATETIME_FORMAT),
         'num_of_messages': int(data[1]),
         'messages': messages
     }
@@ -37,7 +38,7 @@ def _parse_response(response: str):
         message_data = mes.split(';')
         message = {
             'created_at': datetime.datetime.strptime(unquote(message_data[0]), DATETIME_FORMAT)
-                .replace(tzinfo=TIMEZONE_JST).strftime(DATETIME_FORMAT),
+                .replace(tzinfo=TIMEZONE_JST).astimezone(TIMEZONE_UTC).strftime(DATETIME_FORMAT),
             'user.name': unquote(message_data[1]),
             'user.profile_image_url_https': unquote(message_data[2]),
             'media': list(map(unquote, message_data[3].split(','))),

@@ -28,7 +28,7 @@ TIMEZONE_UTC = datetime.timezone(datetime.timedelta(hours=+0), 'UTC')
 def _process_messages(messages, start_time):
     # TODO process have to be into Message class
     def process_message(mes):
-        utc_time = datetime.datetime.strptime(mes['created_datetime'], db.DATETIME_FORMAT)
+        utc_time = datetime.datetime.strptime(mes['created_datetime'], db.DATETIME_FORMAT).replace(tzinfo=TIMEZONE_UTC)
         local_time_str = utc_time.astimezone(TIMEZONE_LOCAL).strftime(db.DATETIME_FORMAT)
         try:
             return ';'.join([
