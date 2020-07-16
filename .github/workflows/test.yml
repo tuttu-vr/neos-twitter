@@ -19,4 +19,5 @@ jobs:
     - name: Test
       run: |
         cd test
-        python -m unittest
+        python -m unittest collector/**/test_*.py
+        python -m unittest server/**/test_*.py

@@ -11,6 +11,17 @@ def _preprocess_message(message: dict):
     message['message'] = quote(message['message'])
 
 
+def _generate_relative_date(day: int):
+    return (datetime.datetime.now() + datetime.timedelta(days=day)).strftime(DATETIME_FORMAT)
+
+
+def _preprocess_neotter_user(user: dict):
+    if type(user['expired']) == int:
+        user['expired'] = _generate_relative_date(user['expired'])
+    if type(user['last_login']) == int:
+        user['last_login'] = _generate_relative_date(user['last_login'])
+
+
 def _preprocess(data_list: list, process_func=None):
     results = []
     for data in data_list:
@@ -29,8 +40,10 @@ def generate_normal_db(data_id: str):
 
     messages = _preprocess(db_json['messages'], _preprocess_message)
     users = _preprocess(db_json['users'])
+    neotter_users = _preprocess(db_json['neotter_users'], _preprocess_neotter_user)
     db.insert_from_dict('messages', messages)
     db.insert_from_dict('users', users)
+    db.insert_from_dict('neotter_users', neotter_users)
 
 
 def get_normal_tweets(data_id: str):
@@ -39,14 +52,30 @@ def get_normal_tweets(data_id: str):
     return db_tweet
 
 
-def get_db_data(delete: bool=False):
-    messages = db.get_all_data('messages', 'message_id')
-    users = db.get_all_data('users', 'user_id')
-    if delete:
-        db.delete_all_data('messages')
-        db.delete_all_data('users')
+def response_from_fixture(tweet: dict):
+    datetime_format = '%a %b %d %H:%M:%S %z %Y'
+    return {
+        'created_at': datetime.datetime.strptime(tweet['created_at'], datetime_format)
+            .strftime(DATETIME_FORMAT),
+        'user.name': '%s@%s' % (tweet['user']['name'], tweet['user']['screen_name']),
+        'user.profile_image_url_https': tweet['user']['profile_image_url_https'],
+        'media': tweet['media'],
+        'text': tweet['text']
+    }
 
-    return messages, users
+
+def get_db_data(delete: bool=False, dict_row=False):
+    db_list = {
+        'messages': 'message_id',
+        'users': 'user_id',
+        'neotter_users': 'id'
+    }
+    result = {}
+    for table_name, sort_key in db_list.items():
+        result[table_name] = db.get_all_data(table_name, sort_key, dict_row)
+        if delete:
+            db.delete_all_data(table_name)
+    return result
 
 
 def tweets_to_model(tweets: list):

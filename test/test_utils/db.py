@@ -49,9 +49,10 @@ def insert_from_dict(table_name: str, json: list):
     _execute_query(sql, values)
 
 
-def get_all_data(table_name: str, order_by: str=None):
+def get_all_data(table_name: str, order_by: str=None, dict_row=False):
     con = _get_connection()
-    # con.row_factory = sqlite3.Row
+    if dict_row:
+        con.row_factory = sqlite3.Row
     cur = con.cursor()
 
     sql = f'select * from {table_name}'
@@ -59,6 +60,20 @@ def get_all_data(table_name: str, order_by: str=None):
         sql += f' order by {order_by}'
     cur.execute(sql)
     data = cur.fetchall()
+    con.close()
+    return data
+
+
+def get_single_data(table_name: str, keys: dict, dict_row=False):
+    con = _get_connection()
+    if dict_row:
+        con.row_factory = sqlite3.Row
+    cur = con.cursor()
+
+    sql = f'select * from {table_name} where '
+    condition = ' and '.join([f"{key} = '{value}'" for key, value in keys.items()])
+    cur.execute(sql + condition)
+    data = cur.fetchone()
     con.close()
     return data
 

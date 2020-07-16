@@ -86,14 +86,9 @@ def _get_start_time(start_time: str):
         raise ValueError(f'error: start time format must be "{db.DATETIME_FORMAT}" but "{start_time}"')
 
 
-@app.route('/recent')
-def get_recent():
-    count      = request.args.get('count', default=3, type=int)
-    offset     = request.args.get('offset', default=0, type=int)
-    start_time = request.args.get('start_time', default=None, type=str)
-    user_token = request.args.get('key', default=None, type=str)
+def _get_recent(count: int, offset: int, start_time: str, user_token: str, remote_addr: str):
     try:
-        user = _get_user(user_token, _get_remote_addr(request))
+        user = _get_user(user_token, remote_addr)
         start_time, start_time_utc = _get_start_time(start_time)
     except ValueError as e:
         return str(e), 400
@@ -101,8 +96,19 @@ def get_recent():
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
 
     messages = db.get_recent_messages(count, offset, start_time_utc.strftime(db.DATETIME_FORMAT), user['id'])
+    db_write.update_auth_expiration(user)
     response = _process_messages(messages, start_time)
     return response
+
+
+@app.route('/recent')
+def get_recent():
+    count      = request.args.get('count', default=3, type=int)
+    offset     = request.args.get('offset', default=0, type=int)
+    start_time = request.args.get('start_time', default=None, type=str)
+    user_token = request.args.get('key', default=None, type=str)
+    remote_addr= _get_remote_addr(request)
+    return _get_recent(count, offset, start_time, user_token, remote_addr)
 
 
 @app.route('/login')

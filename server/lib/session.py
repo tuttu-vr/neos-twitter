@@ -3,8 +3,10 @@ import uuid
 import secrets
 import datetime
 from common.lib import crypt
+from common import configs
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+AUTH_EXPIRATION_DATE = configs.auth_expiration_date
 
 
 def generate_session_id():
@@ -26,7 +28,7 @@ def validate_token(token: str):
 def generate_new_session():
     now = datetime.datetime.now()
     last_login = now.strftime(DATETIME_FORMAT)
-    expired = (now + datetime.timedelta(days=14)).strftime(DATETIME_FORMAT)
+    expired = (now + datetime.timedelta(days=AUTH_EXPIRATION_DATE)).strftime(DATETIME_FORMAT)
 
     session_info = {
         'session_id': generate_session_id(),
