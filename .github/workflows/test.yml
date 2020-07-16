@@ -19,4 +19,5 @@ jobs:
     - name: Test
       run: |
         cd test
-        python -m unittest
+        find collector -name 'test_*.py' | xargs python -m unittest
+        find server -name 'test_*.py' | xargs python -m unittest

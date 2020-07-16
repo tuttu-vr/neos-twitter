@@ -90,5 +90,35 @@
             "icon_url": "https://placehold.jp/400x400.png",
             "client": "twitter"
         }
+    ],
+    "neotter_users": [
+        {
+            "insert": true,
+            "id": "01",
+            "name": "id_3232_haro",
+            "access_key": "none",
+            "access_secret": "none",
+            "session_id": "test-id01234",
+            "client": "twitter",
+            "token": "test_-0923",
+            "expired": 1,
+            "last_login": -10,
+            "remote_addr": "0.0.0.1",
+            "enable_ip_confirm": 1
+        },
+        {
+            "insert": true,
+            "id": "02",
+            "name": "testtest",
+            "access_key": "none",
+            "access_secret": "none",
+            "session_id": "tutu-id01234",
+            "client": "twitter",
+            "token": "-abcde0123",
+            "expired": 2,
+            "last_login": "2020-07-03 15:00:00",
+            "remote_addr": "0.0.0.2",
+            "enable_ip_confirm": 1
+        }
     ]
 }

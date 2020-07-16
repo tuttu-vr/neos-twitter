@@ -1,4 +1,5 @@
 from common import configs
+from common.lib import db
 import sqlite3
 import datetime
 from logging import getLogger, DEBUG, StreamHandler
@@ -10,54 +11,9 @@ logger.setLevel(DEBUG)
 db_path = configs.db_path
 DATETIME_FORMAT = configs.datetime_format
 
-table_messages = """
-create table messages(
-    message_id text primary key,
-    message text,
-    attachments text,
-    user_id text,
-    created_datetime text,
-    client text,
-    neotter_user_id text
-)
-"""
-table_users = """
-create table users(
-    user_id text primary key,
-    name text,
-    icon_url text,
-    client text
-)
-"""
-table_neotter_users = """
-create table neotter_users(
-    id text primary key,
-    name text,
-    access_key text,
-    access_secret text,
-    session_id text,
-    client text,
-    token text,
-    expired text,
-    last_login text,
-    remote_addr text,
-    enable_ip_confirm integer default 1
-)
-"""
 
 def get_connection():
     return sqlite3.connect(db_path)
-
-
-def migration():
-    con = get_connection()
-    cur = con.cursor()
-    cur.execute(table_messages)
-    cur.execute(table_users)
-    cur.execute(table_neotter_users)
-    con.commit()
-    con.close()
-    logger.info('tables created')
 
 
 def put_messages(messages):
@@ -147,4 +103,4 @@ def delete_expired_users():
 
 
 if __name__ == '__main__':
-    migration()
+    db.migration()
