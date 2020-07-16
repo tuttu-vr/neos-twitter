@@ -20,13 +20,16 @@ import app
 from test_utils import fixture, db as test_db
 
 
+TIMEZONE_JST = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
+
+
 def _parse_response(response: str):
     data = response.split('|')
     message_list = data[2].split(TWEET_DELIMITER)
     messages = []
     parsed = {
         'datetime': datetime.datetime.strptime(data[0], DATETIME_FORMAT)
-            .strftime(DATETIME_FORMAT),
+            .astimezone(TIMEZONE_JST).strftime(DATETIME_FORMAT),
         'num_of_messages': int(data[1]),
         'messages': messages
     }
@@ -34,7 +37,7 @@ def _parse_response(response: str):
         message_data = mes.split(';')
         message = {
             'created_at': datetime.datetime.strptime(unquote(message_data[0]), DATETIME_FORMAT)
-                .strftime(DATETIME_FORMAT),
+                .astimezone(TIMEZONE_JST).strftime(DATETIME_FORMAT),
             'user.name': unquote(message_data[1]),
             'user.profile_image_url_https': unquote(message_data[2]),
             'media': list(map(unquote, message_data[3].split(','))),
