@@ -3,6 +3,7 @@ import urllib.parse
 import sqlite3
 import time
 import datetime
+import traceback
 from logging import getLogger, DEBUG, StreamHandler
 
 from dotenv import load_dotenv
@@ -137,16 +138,17 @@ def main():
         try:
             users = db_read.get_valid_neotter_users()
             for user in users:
-                timeline = get_user_timeline(user)
+                try:
+                    timeline = get_user_timeline(user)
+                except tw.TwitterError as e:
+                    logger.error(traceback.format_exc())
+                    time.sleep(1)
                 store_timeline(timeline, user['id'])
             db_write.delete_old_messages(hour_before=TTL_HOUR_MESSAGES)
             time.sleep(90)
         except KeyboardInterrupt as e:
             logger.info('finish')
             break
-        except tw.TwitterError as e:
-            logger.error(e)
-            time.sleep(10 * 60)
 
 
 if __name__ == '__main__':
