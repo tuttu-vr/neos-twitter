@@ -2,3 +2,4 @@ python-twitter
 python-dotenv
 discord.py
 cryptography
+sqlalchemy

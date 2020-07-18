@@ -1,6 +1,9 @@
 from common import configs
 import sqlite3
 
+import sqlalchemy
+import sqlalchemy.orm
+
 
 db_path = configs.db_path
 
@@ -39,6 +42,7 @@ create table neotter_users(
 )
 """
 
+
 def migration():
     con = sqlite3.connect(db_path)
     cur = con.cursor()
@@ -47,3 +51,8 @@ def migration():
     cur.execute(table_neotter_users)
     con.commit()
     con.close()
+
+
+def get_session():
+    engine = sqlalchemy.create_engine('sqlite:///' + db_path, echo=False)
+    return sqlalchemy.orm.sessionmaker(bind=engine)()
