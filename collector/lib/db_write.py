@@ -16,57 +16,6 @@ def get_connection():
     return sqlite3.connect(db_path)
 
 
-def put_messages(messages):
-    con = get_connection()
-    cur = con.cursor()
-
-    logger.info('inserting messages')
-    for mes in messages:
-        mes['created_datetime'] = mes['created_datetime'].strftime(DATETIME_FORMAT)
-        try:
-            sql = """replace into messages values(
-                '%(message_id)s',
-                '%(message)s',
-                '%(attachments)s',
-                '%(user_id)s',
-                '%(created_datetime)s',
-                '%(client)s',
-                '%(neotter_user_id)s'
-            )""" % mes
-            cur.execute(sql)
-        except sqlite3.OperationalError as e:
-            logger.error('failed to put a message')
-            logger.error(sql)
-            logger.error(e)
-            continue
-    con.commit()
-    con.close()
-    logger.info(f'inserted {len(messages)} messages')
-
-
-def put_user(user_list):
-    con = get_connection()
-    cur = con.cursor()
-
-    logger.info('inserting users')
-    for user in user_list:
-        try:
-            cur.execute("""replace into users values(
-                '%(user_id)s',
-                '%(name)s',
-                '%(icon_url)s',
-                '%(client)s'
-            )""" % user)
-        except sqlite3.OperationalError as e:
-            logger.error('failed to put an user')
-            logger.error(user)
-            logger.error(e)
-            continue
-    con.commit()
-    con.close()
-    logger.info(f'inserted {len(user)} users')
-
-
 def delete_old_messages(hour_before: int=48):
     con = get_connection()
     cur = con.cursor()
