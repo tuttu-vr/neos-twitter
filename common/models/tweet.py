@@ -87,7 +87,8 @@ def add_all(status_list: List[Status], neotter_user_id: str):
     tweet_list = from_status_list(status_list, neotter_user_id)
     session = db.get_session()
     try:
-        session.add_all(tweet_list)
+        for tweet in tweet_list:
+            session.merge(tweet)
     except (OperationalError, InternalError):
         logger.error(traceback.format_exc())
         session.rollback()

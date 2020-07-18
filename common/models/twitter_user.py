@@ -44,7 +44,8 @@ def add_all(users: List[User]):
 
     session = db.get_session()
     try:
-        session.add_all(twitter_users)
+        for user in twitter_users:
+            session.merge(user)
     except (OperationalError, InternalError):
         logger.error(traceback.format_exc())
         session.rollback()
