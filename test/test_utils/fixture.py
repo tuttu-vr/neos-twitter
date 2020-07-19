@@ -54,7 +54,15 @@ def get_normal_tweets(data_id: str):
     return db_tweet
 
 
-def response_from_fixture(tweet: dict):
+def response_from_fixture(tweet: dict, version: str='v1'):
+    process = {
+        'v1': _response_from_fixture_v1,
+        'v2': _response_from_fixture_v2
+    }
+    return process[version](tweet)
+
+
+def _response_from_fixture_v1(tweet: dict):
     datetime_format = '%a %b %d %H:%M:%S %z %Y'
     return {
         'created_at': datetime.datetime.strptime(tweet['created_at'], datetime_format)
@@ -63,6 +71,22 @@ def response_from_fixture(tweet: dict):
         'user.profile_image_url_https': tweet['user']['profile_image_url_https'],
         'media': tweet['media'],
         'text': tweet['text']
+    }
+
+
+def _response_from_fixture_v2(tweet: dict):
+    datetime_format = '%a %b %d %H:%M:%S %z %Y'
+    return {
+        'created_at': datetime.datetime.strptime(tweet['created_at'], datetime_format)
+            .strftime(DATETIME_FORMAT),
+        'user.name': '%s@%s' % (tweet['user']['name'], tweet['user']['screen_name']),
+        'user.profile_image_url_https': tweet['user']['profile_image_url_https'],
+        'media': tweet['media'],
+        'text': tweet['text'],
+        'favorite_count': tweet['favorite_count'],
+        'retweet_count': tweet['retweet_count'],
+        'favorited': str(tweet['favorited']),
+        'retweeted': str(tweet['retweeted'])
     }
 
 
