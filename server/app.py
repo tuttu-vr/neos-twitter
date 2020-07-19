@@ -11,6 +11,7 @@ import db_read as db
 from lib import oauth, db_write
 from lib.session import validate_token, generate_new_session, validate_session_id
 from lib.settings import logging_config, get_arguments, TWEET_DELIMITER
+from lib.model_utils.messages import get_recent_messages
 from common.lib import crypt
 
 app = Flask(__name__)
@@ -95,7 +96,7 @@ def _get_recent(count: int, offset: int, start_time: str, user_token: str, remot
 
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
 
-    messages = db.get_recent_messages(count, offset, start_time_utc.strftime(db.DATETIME_FORMAT), user['id'])
+    messages = get_recent_messages(count, offset, start_time_utc.strftime(db.DATETIME_FORMAT), user['id'])
     db_write.update_auth_expiration(user)
     response = _process_messages(messages, start_time)
     return response
