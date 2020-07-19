@@ -8,7 +8,11 @@
             "user_id": "01",
             "created_datetime": "2020-07-03 15:00:00",
             "client": "twitter",
-            "neotter_user_id": "01"
+            "neotter_user_id": "01",
+            "favorite_count": 0,
+            "retweet_count": 0,
+            "favorited": false,
+            "retweeted": false
         },
         {
             "insert": true,
@@ -18,7 +22,11 @@
             "user_id": "01",
             "created_datetime": "2020-07-03 15:00:00",
             "client": "twitter",
-            "neotter_user_id": "02"
+            "neotter_user_id": "02",
+            "favorite_count": 0,
+            "retweet_count": 0,
+            "favorited": false,
+            "retweeted": false
         },
         {
             "insert": false,
@@ -28,7 +36,11 @@
             "user_id": "02",
             "created_datetime": "2020-07-03 15:01:00",
             "client": "twitter",
-            "neotter_user_id": "01"
+            "neotter_user_id": "01",
+            "favorite_count": 0,
+            "retweet_count": 0,
+            "favorited": false,
+            "retweeted": false
         },
         {
             "insert": true,
@@ -38,7 +50,11 @@
             "user_id": "03",
             "created_datetime": "2020-07-03 15:02:00",
             "client": "twitter",
-            "neotter_user_id": "01"
+            "neotter_user_id": "01",
+            "favorite_count": 0,
+            "retweet_count": 0,
+            "favorited": false,
+            "retweeted": false
         },
         {
             "insert": true,
@@ -48,7 +64,11 @@
             "user_id": "02",
             "created_datetime": "2020-07-03 15:03:00",
             "client": "twitter",
-            "neotter_user_id": "01"
+            "neotter_user_id": "01",
+            "favorite_count": 0,
+            "retweet_count": 0,
+            "favorited": false,
+            "retweeted": false
         },
         {
             "insert": true,
@@ -58,7 +78,11 @@
             "user_id": "04",
             "created_datetime": "2020-07-03 15:33:00",
             "client": "twitter",
-            "neotter_user_id": "02"
+            "neotter_user_id": "02",
+            "favorite_count": 0,
+            "retweet_count": 0,
+            "favorited": false,
+            "retweeted": false
         }
     ],
     "users": [

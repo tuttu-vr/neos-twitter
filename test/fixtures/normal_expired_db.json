@@ -1,0 +1,80 @@
+{
+    "messages": [
+        {
+            "insert": true,
+            "message_id": "01-1001",
+            "message": "expired tweet",
+            "attachments": "",
+            "user_id": "01",
+            "created_datetime": -3,
+            "client": "twitter",
+            "neotter_user_id": "01"
+        },
+        {
+            "insert": true,
+            "message_id": "01-1004",
+            "message": "not expired",
+            "attachments": "",
+            "user_id": "02",
+            "created_datetime": -1,
+            "client": "twitter",
+            "neotter_user_id": "01"
+        },
+        {
+            "insert": true,
+            "message_id": "02-1001",
+            "message": "expired tweet",
+            "attachments": "",
+            "user_id": "01",
+            "created_datetime": -3,
+            "client": "twitter",
+            "neotter_user_id": "02"
+        }
+    ],
+    "users": [
+        {
+            "insert": true,
+            "user_id": "01",
+            "name": "はろ@id_3232_haro",
+            "icon_url": "https://pbs.twimg.com/profile_images/1228677608545538048/Tcguv7Tw_400x400.jpg",
+            "client": "twitter"
+        },
+        {
+            "insert": true,
+            "user_id": "02",
+            "name": "tuttu@testtest",
+            "icon_url": "https://placehold.jp/400x400.png",
+            "client": "twitter"
+        }
+    ],
+    "neotter_users": [
+        {
+            "insert": true,
+            "id": "01",
+            "name": "id_3232_haro",
+            "access_key": "none",
+            "access_secret": "none",
+            "session_id": "test-id01234",
+            "client": "twitter",
+            "token": "test_-0923",
+            "expired": 1,
+            "last_login": -10,
+            "remote_addr": "0.0.0.1",
+            "enable_ip_confirm": 1
+        },
+        {
+            "insert": true,
+            "id": "02",
+            "name": "testtest",
+            "access_key": "none",
+            "access_secret": "none",
+            "session_id": "tutu-id01234",
+            "client": "twitter",
+            "token": "-abcde0123",
+            "expired": -1,
+            "last_login": "2020-07-03 15:00:00",
+            "remote_addr": "0.0.0.2",
+            "enable_ip_confirm": 1
+        }
+    ]
+}

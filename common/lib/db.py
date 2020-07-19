@@ -1,6 +1,9 @@
 from common import configs
 import sqlite3
 
+import sqlalchemy
+import sqlalchemy.orm
+
 
 db_path = configs.db_path
 
@@ -12,7 +15,11 @@ create table messages(
     user_id text,
     created_datetime text,
     client text,
-    neotter_user_id text
+    neotter_user_id text,
+    favorite_count integer default 0,
+    retweet_count integer default 0,
+    favorited integer default 0,
+    retweeted integer default 0
 )
 """
 table_users = """
@@ -39,6 +46,7 @@ create table neotter_users(
 )
 """
 
+
 def migration():
     con = sqlite3.connect(db_path)
     cur = con.cursor()
@@ -47,3 +55,12 @@ def migration():
     cur.execute(table_neotter_users)
     con.commit()
     con.close()
+
+
+def get_session():
+    engine = sqlalchemy.create_engine('sqlite:///' + db_path, echo=False)
+    return sqlalchemy.orm.sessionmaker(bind=engine)()
+
+
+if __name__ == '__main__':
+    migration()
