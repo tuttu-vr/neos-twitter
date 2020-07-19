@@ -9,9 +9,8 @@ from logging import getLogger, DEBUG, StreamHandler
 from dotenv import load_dotenv
 import twitter as tw
 
-from lib import db_write, db_read
 from common.lib import crypt
-from common.models import tweet, twitter_user
+from common.models import tweet, twitter_user, neotter_user
 
 logger = getLogger(__name__)
 logger.addHandler(StreamHandler())
@@ -58,7 +57,7 @@ def get_user_timeline(user):
     try:
         api = get_twitter_api(access_key, access_secret)
         timeline = api.GetHomeTimeline(count=NUM_TIMELINE_GET_COUNT)
-    except tw.TwitterError as e:
+    except tw.TwitterError:
         logger.error(traceback.format_exc())
         time.sleep(1)
         return []
@@ -74,15 +73,24 @@ def store_timeline(timeline: list, user_id: str):
     twitter_user.add_all(user_list)
 
 
+def delete_expired():
+    tweet.delete_old_tweets(hour_before=TTL_HOUR_MESSAGES)
+    neotter_user.delete_expired_users()
+
+
+def get_neotter_users():
+    return neotter_user.get_valid_users()
+
+
 def main():
     while True:
         start_time = time.time()
-        users = db_read.get_valid_neotter_users()
-        for user in users:
+        for user in get_neotter_users():
             timeline = get_user_timeline(user)
             store_timeline(timeline, user['id'])
-        db_write.delete_old_messages(hour_before=TTL_HOUR_MESSAGES)
+        delete_expired()
         elapsed = time.time() - start_time
+        logger.info(f'Elapsed time to crawl: {elapsed}s')
         if elapsed < CRAWL_INTERVAL_SEC:
             time.sleep(CRAWL_INTERVAL_SEC - elapsed)
         else:

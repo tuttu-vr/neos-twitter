@@ -9,6 +9,8 @@ DATETIME_FORMAT = configs.datetime_format
 
 def _preprocess_message(message: dict):
     message['message'] = quote(message['message'])
+    if type(message['created_datetime']) == int:
+        message['created_datetime'] = _generate_relative_date(message['created_datetime'])
 
 
 def _generate_relative_date(day: int):
@@ -64,7 +66,7 @@ def response_from_fixture(tweet: dict):
     }
 
 
-def get_db_data(delete: bool=False, dict_row=False):
+def get_db_data(delete: bool=False, dict_row: bool=False):
     db_list = {
         'messages': 'message_id',
         'users': 'user_id',

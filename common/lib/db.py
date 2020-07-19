@@ -56,3 +56,7 @@ def migration():
 def get_session():
     engine = sqlalchemy.create_engine('sqlite:///' + db_path, echo=False)
     return sqlalchemy.orm.sessionmaker(bind=engine)()
+
+
+if __name__ == '__main__':
+    migration()
