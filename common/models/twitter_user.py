@@ -33,6 +33,10 @@ class TwitterUser(Base):
 
         return twitter_user
 
+    def to_dict(self):
+        _dict = {col.name: getattr(self, col.name) for col in self.__table__.columns}
+        return _dict
+
 
 def from_user_list(users: List[User]):
     twitter_users = list(map(lambda user: TwitterUser.create(user), users))

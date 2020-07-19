@@ -11,7 +11,9 @@ import db_read as db
 from lib import oauth, db_write
 from lib.session import validate_token, generate_new_session, validate_session_id
 from lib.settings import logging_config, get_arguments, TWEET_DELIMITER
+from lib.model_utils.messages import get_recent_messages
 from common.lib import crypt
+import api.v2.recent_tweet
 
 app = Flask(__name__)
 logger = getLogger(__name__)
@@ -85,8 +87,12 @@ def _get_start_time(start_time: str):
         # to avoid sql injection
         raise ValueError(f'error: start time format must be "{db.DATETIME_FORMAT}" but "{start_time}"')
 
+message_processer = {
+    'v1': _process_messages,
+    'v2': api.v2.recent_tweet.process_messages
+}
 
-def _get_recent(count: int, offset: int, start_time: str, user_token: str, remote_addr: str):
+def _get_recent(count: int, offset: int, start_time: str, user_token: str, remote_addr: str, version: str='v1'):
     try:
         user = _get_user(user_token, remote_addr)
         start_time, start_time_utc = _get_start_time(start_time)
@@ -95,9 +101,9 @@ def _get_recent(count: int, offset: int, start_time: str, user_token: str, remot
 
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
 
-    messages = db.get_recent_messages(count, offset, start_time_utc.strftime(db.DATETIME_FORMAT), user['id'])
+    messages = get_recent_messages(count, offset, start_time_utc.strftime(db.DATETIME_FORMAT), user['id'])
     db_write.update_auth_expiration(user)
-    response = _process_messages(messages, start_time)
+    response = message_processer[version](messages, start_time)
     return response
 
 
@@ -109,6 +115,16 @@ def get_recent():
     user_token = request.args.get('key', default=None, type=str)
     remote_addr= _get_remote_addr(request)
     return _get_recent(count, offset, start_time, user_token, remote_addr)
+
+
+@app.route('/api/v2/recent')
+def get_recent_v2():
+    count      = request.args.get('count', default=3, type=int)
+    offset     = request.args.get('offset', default=0, type=int)
+    start_time = request.args.get('start_time', default=None, type=str)
+    user_token = request.args.get('key', default=None, type=str)
+    remote_addr= _get_remote_addr(request)
+    return _get_recent(count, offset, start_time, user_token, remote_addr, version='v2')
 
 
 @app.route('/login')

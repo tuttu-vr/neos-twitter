@@ -16,7 +16,6 @@ logger = getLogger(__name__)
 Base = declarative_base()
 
 
-
 class NeotterUser(Base):
     id = Column(String, primary_key=True)
     name = Column(String)

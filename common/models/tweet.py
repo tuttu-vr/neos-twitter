@@ -68,6 +68,10 @@ class Tweet(Base):
     def deprecated_filters(cls, status: Status):
         return not status.text.startswith('RT ')
 
+    def to_dict(self):
+        _dict = {col.name: getattr(self, col.name) for col in self.__table__.columns}
+        return _dict
+
 
 def from_status_list(status_list: List[Status], neotter_user_id: str):
     tweet_list = list(filter(lambda tw: tw, map(
