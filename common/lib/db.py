@@ -15,7 +15,11 @@ create table messages(
     user_id text,
     created_datetime text,
     client text,
-    neotter_user_id text
+    neotter_user_id text,
+    favorite_count integer default 0,
+    retweet_count integer default 0,
+    favorited integer default 0,
+    retweeted integer default 0
 )
 """
 table_users = """

@@ -81,17 +81,17 @@ def get_db_data(delete: bool=False, dict_row: bool=False):
 
 
 def tweets_to_model(tweets: list):
-    return [Tweet(tweet) for tweet in tweets]
+    return [TestStatus(tweet) for tweet in tweets]
 
 
-class User:
+class TestUser:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
 
-class Tweet:
+class TestStatus:
     def __init__(self, data: dict):
         for key, value in data.items():
             if key == 'user':
-                value = User(**value)
+                value = TestUser(**value)
             setattr(self, key, value)

@@ -29,10 +29,10 @@ class Tweet(Base):
     created_datetime = Column(String)
     client = Column(String, default='twitter')
     neotter_user_id = Column(String)
-    # favorite_count = Column(Integer)
-    # retweet_count = Column(Integer)
-    # favorited = Column(Boolean)
-    # retweeted = Column(Boolean)
+    favorite_count = Column(Integer, default=0)
+    retweet_count = Column(Integer, default=0)
+    favorited = Column(Boolean, default=False)
+    retweeted = Column(Boolean, default=False)
 
     __tablename__ = 'messages'
 
@@ -51,10 +51,10 @@ class Tweet(Base):
             user_id = status.user.id_str,
             created_datetime = created_at,
             neotter_user_id = neotter_user_id,
-            # favorite_count = status.favorite_count,
-            # retweet_count = status.retweeted,
-            # favorited = status.favorited,
-            # retweeted = status.retweeted
+            favorite_count = status.favorite_count,
+            retweet_count = status.retweeted,
+            favorited = status.favorited,
+            retweeted = status.retweeted
         )
 
         if status.media:
