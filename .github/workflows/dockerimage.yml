@@ -18,7 +18,7 @@ jobs:
         mv docker-compose-prod.yml docker-compose.yml
         touch collector/.env
         touch server/.env
-        ./build.sh
+        ./build.sh full
         docker-compose -f docker-compose-rproxy.yml build
     - name: Push the Docker images
       if: github.event_name == 'push'

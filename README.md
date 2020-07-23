@@ -18,19 +18,18 @@ TWITTER_CONSUMER_SECRET=<your_secret>
 FLASK_SESSION_SECRET=<any_random_string>
 ```
 
-Add to server/.env if needed (to publish your server in a private network)
-```
-NGROK_AUTH_TOKEN=<your_ngrok_token>
-```
+# twitter developer settings
+
+You have to set `http://localhost:8080/register` as `callback url`.
 
 # run
 
 At the root of this project, run
 ```
-./build.sh
+./build.sh full
 docker-compose up
 ```
 
-If you execute that, twitter collector and server will launch.
-Then ngrok url(ex. http://xxxyyyzz.ngrok.io) will be displayed on your console.
-You can access the api by the url of http://xxxyyyzz.ngrok.io/recent .
+If you execute that, twitter collector and server will be launched.
+Then you can access the api by the url of http://localhost:8080/login .
+To see other api, check /server/app.py.
