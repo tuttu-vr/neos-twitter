@@ -17,6 +17,7 @@ def parse_message(mes: str) -> dict:
         'created_at': datetime.datetime.strptime(unquote(message_data['created_at']), DATETIME_FORMAT)
             .replace(tzinfo=TIMEZONE_JST).astimezone(TIMEZONE_UTC).strftime(DATETIME_FORMAT),
         'user.name': unquote(message_data['name']),
+        'user.id': message_data['user_id'],
         'user.profile_image_url_https': unquote(message_data['icon_url']),
         'media': list(map(unquote, message_data['attachments'].split(','))),
         'text': unquote(message_data['message']),

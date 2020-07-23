@@ -81,6 +81,7 @@ def _response_from_fixture_v2(tweet: dict):
         'created_at': datetime.datetime.strptime(tweet['created_at'], datetime_format)
             .strftime(DATETIME_FORMAT),
         'user.name': '%s@%s' % (tweet['user']['name'], tweet['user']['screen_name']),
+        'user.id': tweet['user']['id_str'],
         'user.profile_image_url_https': tweet['user']['profile_image_url_https'],
         'media': tweet['media'],
         'text': tweet['text'],

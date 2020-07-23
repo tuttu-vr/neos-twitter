@@ -26,6 +26,7 @@ def _process_messages(messages: List[Dict]) -> List[str]:
                 'id=' + mes['message_id'].split('-')[1], # TODO keep original id on DB
                 'created_at=' + quote(local_time_str),
                 'name=' + quote(mes['name']),
+                'user_id=' + mes['user_id'],
                 'icon_url=' + quote(mes['icon_url']),
                 'attachments=' + (quote(mes['attachments']) if mes['attachments'] else ''),
                 'message=' + mes['message'],
