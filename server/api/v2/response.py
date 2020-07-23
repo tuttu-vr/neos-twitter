@@ -78,6 +78,7 @@ def get_status_list(status_id_list_str: str, user: NeotterUser) -> str:
 def get_user_timeline(user: NeotterUser, twitter_user_id: str) -> str:
     twitter_user_raw, user_timeline = twitter.get_user_timeline(user, twitter_user_id)
     if twitter_user_raw is None:
+        logger.info('No user found by: %s %s' % (twitter_user_id, user.name))
         return 'No User Found'
     return f'{_process_profile(twitter_user_raw)}|{_join_to_str(user_timeline)}'
 
@@ -86,5 +87,6 @@ def get_search_result(user: NeotterUser, query: str) -> str:
     """
     query must be decoded
     """
+    logger.info('Search query: %s by %s' % (query, user.name))
     search_result = twitter.get_search_result(user, query)
     return _join_to_str(search_result)
