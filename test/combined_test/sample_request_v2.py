@@ -1,4 +1,5 @@
 import json
+from urllib.parse import unquote
 import requests
 import argparse
 import time
@@ -19,13 +20,23 @@ def load_args():
     return parser.parse_args()
 
 
+def dump_messages(message_str_list: list):
+    for message_str in message_str_list:
+        message = parser.parse_message(message_str)
+        logger.info(json.dumps(message, indent=4, ensure_ascii=False))
+
+
+def parse_auto(data_str_list: list):
+    for data_str in data_str_list:
+        key, value = data_str.split('=')
+        logger.info(f'{key}: {unquote(value)}')
+
+
 def dump_request(api_name: str, query: dict):
     res = requests.get(endpoint + api_name, query)
     logger.info(api_name)
     logger.info(res.text)
-    for message_str in res.text.split(DELIMITER):
-        message = parser.parse_message(message_str)
-        logger.info(json.dumps(message, indent=4, ensure_ascii=False))
+    dump_messages(res.text.split(DELIMITER))
 
 
 def test_get_status_list(key: str, id_list: list=['1286075295468892160', '1286202545065431042']):
@@ -42,7 +53,10 @@ def test_get_user_timeline(key: str, user_id: str='1213118571045240835'):
         'key': key,
         'user_id': user_id
     }
-    dump_request('user-timeline', query)
+    res = requests.get(endpoint + 'user-timeline', query)
+    user_status, messages = res.text.split('|')
+    dump_messages(messages.split(DELIMITER))
+    parse_auto(user_status.split(';'))
 
 
 def test_get_search_result(key: str, query: str='#NeosVR'):
