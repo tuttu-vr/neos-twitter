@@ -55,8 +55,8 @@ def test_get_search_result(key: str, query: str='#NeosVR'):
 
 if __name__ == '__main__':
     args = load_args()
-    # test_get_status_list(args.key)
-    # time.sleep(0.5)
-    # test_get_user_timeline(args.key)
-    # time.sleep(0.5)
+    test_get_status_list(args.key)
+    time.sleep(0.5)
+    test_get_user_timeline(args.key)
+    time.sleep(0.5)
     test_get_search_result(args.key)

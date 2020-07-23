@@ -49,7 +49,7 @@ def _join_to_str(status_list: List[Dict]) -> str:
 
 def get_recent_response(messages: List[Dict], start_time: str) -> str:
     text_list = _process_messages(messages)
-    text_list_str = DELIMITER.join(messages)
+    text_list_str = DELIMITER.join(text_list)
     return f'{start_time}|{len(text_list)}|{text_list_str}'
 
 

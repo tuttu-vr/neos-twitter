@@ -28,16 +28,14 @@ def _api_by_user(user: NeotterUser):
 def _statuses_to_dict_list(status_list_raw: list, neotter_user_id: str) -> List[Dict]:
     # need to be tested
     # neotter_user_id is not used
-    message_list = map(
-        lambda tw: Tweet.create(tw, neotter_user_id, contain_retweet=True).to_dict(),
-        status_list_raw)
-    user_list = map(
-        lambda us: TwitterUser.create(us).to_dict(), map(
-            lambda st: st.user, status_list_raw))
     status_list = []
-    for mes, tweet_user in zip(message_list, user_list):
-        mes.update(tweet_user)
-        status_list.append(mes)
+    for status in status_list_raw:
+        tweet = Tweet.create(status, neotter_user_id, contain_retweet=True)
+        if not tweet:
+            continue
+        user = TwitterUser.create(status.user).to_dict()
+        user.update(tweet.to_dict())
+        status_list.append(user)
     return status_list
 
 
