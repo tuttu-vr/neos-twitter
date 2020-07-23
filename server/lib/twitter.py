@@ -48,10 +48,14 @@ def get_status_list(user: NeotterUser, status_id_list_str: str) -> List[Dict]:
     return _statuses_to_dict_list(status_list_raw, user.id)
 
 
-def get_user_timeline(user: NeotterUser, twitter_user_id: str, count: int=50) -> List[Dict]:
+def get_user_timeline(user: NeotterUser, twitter_user_id: str, count: int=50):
     api = _api_by_user(user)
     user_timeline = api.GetUserTimeline(twitter_user_id, count=50)
-    return _statuses_to_dict_list(user_timeline, user.id)
+    if len(user_timeline) > 0:
+        twitter_user_raw = user_timeline[0].user
+        return twitter_user_raw, _statuses_to_dict_list(user_timeline, user.id)
+    else:
+        return None, None
 
 
 def get_search_result(user: NeotterUser, search_query: str) -> List[Dict]:
