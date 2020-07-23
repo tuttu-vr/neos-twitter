@@ -7,7 +7,7 @@ from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import OperationalError, InternalError
 
-from common.lib import db
+from common.lib import db, crypt
 from common import configs
 
 DATETIME_FORMAT = configs.datetime_format
@@ -34,6 +34,9 @@ class NeotterUser(Base):
     def to_dict(self) -> Dict:
         _dict = {col.name: getattr(self, col.name) for col in self.__table__.columns}
         return _dict
+
+    def get_auth_token(self) -> (str, str):
+        return crypt.decrypt(self.access_key), crypt.decrypt(self.access_secret)
 
 
 def delete_expired_users():

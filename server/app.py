@@ -15,8 +15,7 @@ from common import configs
 from common.lib import crypt
 from common.models import neotter_user
 
-import api.v2.recent_tweet
-import api.v2.status_list
+import api.v2.response
 
 app = Flask(__name__)
 logger = getLogger(__name__)
@@ -54,14 +53,13 @@ def _process_messages(messages, start_time):
     return f'{start_time}|{len(text_list)}|{response}'
 
 
-def _get_user(token: str, remote_addr: str):
+def _get_user(token: str, remote_addr: str) -> neotter_user.NeotterUser:
     if not validate_token(token):
         raise ValueError('Error: no valid token found')
     user = neotter_user.get_by_token(token)
     if not user:
         raise ValueError(f'Error: invalid token {token}')
-    user = user.to_dict()
-    if user['enable_ip_confirm'] and crypt.decrypt(user['remote_addr']) != remote_addr:
+    if user.enable_ip_confirm and crypt.decrypt(user.remote_addr) != remote_addr:
         raise ValueError(f'Error: invalid addr {remote_addr}')
     return user
 
@@ -94,7 +92,7 @@ def _get_start_time(start_time: str):
 
 message_processer = {
     'v1': _process_messages,
-    'v2': api.v2.recent_tweet.process_messages
+    'v2': api.v2.response.get_recent_response
 }
 
 def _get_recent(count: int, offset: int, start_time: str, user_token: str, remote_addr: str, version: str='v1'):
@@ -134,12 +132,37 @@ def get_recent_v2():
 
 @app.route('/api/v2/status-list')
 def get_status_list():
-    request_status_id = request.args.get('count', default='', type=str)
+    request_status_id = request.args.get('status_ids', default='', type=str)
     user_token        = request.args.get('key', default=None, type=str)
     remote_addr       = _get_remote_addr(request)
     try:
         user = _get_user(user_token, remote_addr)
-        return api.v2.status_list.get_status_list(request_status_id, user)
+        return api.v2.response.get_status_list(request_status_id, user)
+    except ValueError as e:
+        return str(e), 400
+
+
+@app.route('/api/v2/user-timeline')
+def get_user_timeline():
+    twitter_user_id = request.args.get('user_id', default=None, type=str)
+    user_token      = request.args.get('key', default=None, type=str)
+    remote_addr     = _get_remote_addr(request)
+    try:
+        user = _get_user(user_token, remote_addr)
+        return api.v2.response.get_user_timeline(user, twitter_user_id)
+    except ValueError as e:
+        return str(e), 400
+
+
+@app.route('/api/v2/search-result')
+def get_search_result():
+    search_query = request.args.get('query', default='', type=str)
+    user_token   = request.args.get('key', default=None, type=str)
+    remote_addr  = _get_remote_addr(request)
+    logger.debug(search_query)
+    try:
+        user = _get_user(user_token, remote_addr)
+        return api.v2.response.get_search_result(user, search_query)
     except ValueError as e:
         return str(e), 400
 

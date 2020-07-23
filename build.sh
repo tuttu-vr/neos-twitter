@@ -7,4 +7,6 @@ mkdir -p collector/common
 cp -r common/* server/common/
 cp -r common/* collector/common/
 
-docker-compose build
+if [ "x$1" = "xfull" ]; then
+    docker-compose build
+fi

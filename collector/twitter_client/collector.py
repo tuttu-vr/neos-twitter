@@ -9,7 +9,7 @@ from logging import getLogger, DEBUG, StreamHandler
 from dotenv import load_dotenv
 import twitter as tw
 
-from common.lib import crypt
+from common.lib import crypt, twitter
 from common.models import tweet, twitter_user, neotter_user
 
 logger = getLogger(__name__)
@@ -18,18 +18,7 @@ logger.setLevel(DEBUG)
 
 load_dotenv(verbose=True)
 
-CONSUMER_KEY = os.getenv('TWITTER_CONSUMER_KEY', '')
-CONSUMER_SECRET = os.getenv('TWITTER_CONSUMER_SECRET', '')
-
 DATETIME_FORMAT = '%a %b %d %H:%M:%S %z %Y'
-
-
-def get_twitter_api(access_token_key: str, access_token_secret: str):
-    api = tw.Api(consumer_key=CONSUMER_KEY,
-                 consumer_secret=CONSUMER_SECRET,
-                 access_token_key=access_token_key,
-                 access_token_secret=access_token_secret)
-    return api
 
 
 def get_search_result(api):
@@ -55,7 +44,7 @@ def get_user_timeline(user):
     access_secret = crypt.decrypt(user['access_secret'])
 
     try:
-        api = get_twitter_api(access_key, access_secret)
+        api = twitter.get_twitter_api(access_key, access_secret)
         timeline = api.GetHomeTimeline(count=NUM_TIMELINE_GET_COUNT)
     except tw.TwitterError:
         logger.error(traceback.format_exc())

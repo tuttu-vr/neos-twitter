@@ -24,7 +24,7 @@ class TwitterUser(Base):
     __tablename__ = 'users'
 
     @classmethod
-    def create(cls, user: User):
+    def create(cls, user: User) -> "TwitterUser":
         twitter_user = TwitterUser(
             user_id = user.id_str,
             name = f'{user.name}@{user.screen_name}',
@@ -38,7 +38,7 @@ class TwitterUser(Base):
         return _dict
 
 
-def from_user_list(users: List[User]):
+def from_user_list(users: List[User]) -> List[TwitterUser]:
     twitter_users = list(map(lambda user: TwitterUser.create(user), users))
     return twitter_users
 
@@ -57,3 +57,9 @@ def add_all(users: List[User]):
         session.commit()
     finally:
         session.close()
+
+
+def get_by_id(user_id: str) -> TwitterUser:
+    session = db.get_session()
+    user = session.query(TwitterUser).filter(TwitterUser.user_id == user_id).first()
+    return user
