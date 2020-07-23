@@ -7,19 +7,22 @@ from urllib.parse import quote
 from logging import getLogger, DEBUG, INFO
 from flask import Flask, request, render_template, redirect, url_for, session
 
-import db_read as db
 from lib import oauth, db_write
 from lib.session import validate_token, generate_new_session, validate_session_id
 from lib.settings import logging_config, get_arguments, TWEET_DELIMITER
 from lib.model_utils.messages import get_recent_messages
+from common import configs
 from common.lib import crypt
-import api.v2.recent_tweet
+from common.models import neotter_user
+
+import api.v2.response
 
 app = Flask(__name__)
 logger = getLogger(__name__)
 
 
 DELIMITER = TWEET_DELIMITER
+DATETIME_FORMAT = configs.datetime_format
 
 DEFAULT_BACKTIME_MINUTES = 30
 
@@ -30,8 +33,8 @@ TIMEZONE_UTC = datetime.timezone(datetime.timedelta(hours=+0), 'UTC')
 def _process_messages(messages, start_time):
     # TODO process have to be into Message class
     def process_message(mes):
-        utc_time = datetime.datetime.strptime(mes['created_datetime'], db.DATETIME_FORMAT).replace(tzinfo=TIMEZONE_UTC)
-        local_time_str = utc_time.astimezone(TIMEZONE_LOCAL).strftime(db.DATETIME_FORMAT)
+        utc_time = datetime.datetime.strptime(mes['created_datetime'], DATETIME_FORMAT).replace(tzinfo=TIMEZONE_UTC)
+        local_time_str = utc_time.astimezone(TIMEZONE_LOCAL).strftime(DATETIME_FORMAT)
         try:
             return ';'.join([
                 quote(local_time_str),
@@ -50,13 +53,13 @@ def _process_messages(messages, start_time):
     return f'{start_time}|{len(text_list)}|{response}'
 
 
-def _get_user(token: str, remote_addr: str):
+def _get_user(token: str, remote_addr: str) -> neotter_user.NeotterUser:
     if not validate_token(token):
         raise ValueError('Error: no valid token found')
-    user = db.get_neotter_user_by_token(token)
+    user = neotter_user.get_by_token(token)
     if not user:
         raise ValueError(f'Error: invalid token {token}')
-    if user['enable_ip_confirm'] and crypt.decrypt(user['remote_addr']) != remote_addr:
+    if user.enable_ip_confirm and crypt.decrypt(user.remote_addr) != remote_addr:
         raise ValueError(f'Error: invalid addr {remote_addr}')
     return user
 
@@ -76,32 +79,32 @@ def _get_remote_addr(request):
 def _get_start_time(start_time: str):
     if not start_time:
         start_time_utc = (datetime.datetime.now(TIMEZONE_UTC) - datetime.timedelta(minutes=DEFAULT_BACKTIME_MINUTES))
-        start_time = start_time_utc.astimezone(TIMEZONE_LOCAL).strftime(db.DATETIME_FORMAT)
+        start_time = start_time_utc.astimezone(TIMEZONE_LOCAL).strftime(DATETIME_FORMAT)
         return start_time, start_time_utc
     try:
-        start_time_local = datetime.datetime.strptime(start_time, db.DATETIME_FORMAT).replace(tzinfo=TIMEZONE_LOCAL)
+        start_time_local = datetime.datetime.strptime(start_time, DATETIME_FORMAT).replace(tzinfo=TIMEZONE_LOCAL)
         start_time_utc = start_time_local.astimezone(TIMEZONE_UTC)
         logger.debug(start_time_utc)
         return start_time, start_time_utc
     except ValueError:
         # to avoid sql injection
-        raise ValueError(f'error: start time format must be "{db.DATETIME_FORMAT}" but "{start_time}"')
+        raise ValueError(f'error: start time format must be "{DATETIME_FORMAT}" but "{start_time}"')
 
 message_processer = {
     'v1': _process_messages,
-    'v2': api.v2.recent_tweet.process_messages
+    'v2': api.v2.response.get_recent_response
 }
 
 def _get_recent(count: int, offset: int, start_time: str, user_token: str, remote_addr: str, version: str='v1'):
     try:
-        user = _get_user(user_token, remote_addr)
+        user = _get_user(user_token, remote_addr).to_dict()
         start_time, start_time_utc = _get_start_time(start_time)
     except ValueError as e:
         return str(e), 400
 
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
 
-    messages = get_recent_messages(count, offset, start_time_utc.strftime(db.DATETIME_FORMAT), user['id'])
+    messages = get_recent_messages(count, offset, start_time_utc.strftime(DATETIME_FORMAT), user['id'])
     db_write.update_auth_expiration(user)
     response = message_processer[version](messages, start_time)
     return response
@@ -125,6 +128,43 @@ def get_recent_v2():
     user_token = request.args.get('key', default=None, type=str)
     remote_addr= _get_remote_addr(request)
     return _get_recent(count, offset, start_time, user_token, remote_addr, version='v2')
+
+
+@app.route('/api/v2/status-list')
+def get_status_list():
+    request_status_id = request.args.get('status_ids', default='', type=str)
+    user_token        = request.args.get('key', default=None, type=str)
+    remote_addr       = _get_remote_addr(request)
+    try:
+        user = _get_user(user_token, remote_addr)
+        return api.v2.response.get_status_list(request_status_id, user)
+    except ValueError as e:
+        return str(e), 400
+
+
+@app.route('/api/v2/user-timeline')
+def get_user_timeline():
+    twitter_user_id = request.args.get('user_id', default=None, type=str)
+    user_token      = request.args.get('key', default=None, type=str)
+    remote_addr     = _get_remote_addr(request)
+    try:
+        user = _get_user(user_token, remote_addr)
+        return api.v2.response.get_user_timeline(user, twitter_user_id)
+    except ValueError as e:
+        return str(e), 400
+
+
+@app.route('/api/v2/search-result')
+def get_search_result():
+    search_query = request.args.get('query', default='', type=str)
+    user_token   = request.args.get('key', default=None, type=str)
+    remote_addr  = _get_remote_addr(request)
+    logger.debug(search_query)
+    try:
+        user = _get_user(user_token, remote_addr)
+        return api.v2.response.get_search_result(user, search_query)
+    except ValueError as e:
+        return str(e), 400
 
 
 @app.route('/login')
@@ -172,14 +212,14 @@ def register():
 @app.route('/user-page')
 def user_page():
     if 'session_id' in session and validate_session_id(session['session_id']):
-        user_data = db.get_neotter_user_by_session(session['session_id'])
+        user_data = neotter_user.get_by_session(session['session_id'])
     else:
         user_data = None
     if not user_data:
         return redirect(url_for('login'))
     user = {
-        'name': user_data['name'],
-        'token': user_data['token']
+        'name': user_data.name,
+        'token': user_data.token
     }
     return render_template('user-page.html', user=user, title='Neotter user page')
 

@@ -3,6 +3,7 @@ import sqlite3
 
 import sqlalchemy
 import sqlalchemy.orm
+from sqlalchemy.orm import Session
 
 
 db_path = configs.db_path
@@ -57,7 +58,7 @@ def migration():
     con.close()
 
 
-def get_session():
+def get_session() -> Session:
     engine = sqlalchemy.create_engine('sqlite:///' + db_path, echo=False)
     return sqlalchemy.orm.sessionmaker(bind=engine)()
 

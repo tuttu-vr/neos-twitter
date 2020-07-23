@@ -37,9 +37,9 @@ class Tweet(Base):
     __tablename__ = 'messages'
 
     @classmethod
-    def create(cls, status: Status, neotter_user_id: str):
+    def create(cls, status: Status, neotter_user_id: str, contain_retweet: bool=False):
         # deprecated process / TODO: remove
-        if not cls.deprecated_filters(status):
+        if not contain_retweet and not cls.deprecated_filters(status):
             return None
         created_at = datetime.datetime.strptime(
             status.created_at, TWITTER_DATETIME_FORMAT
