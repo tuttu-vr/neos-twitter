@@ -5,12 +5,6 @@ RUN apk update && \
     build-base libffi-dev openssl openssl-dev \
     unzip jq
 
-# a tool for local execute
-ADD https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip /tmp
-
-RUN unzip /tmp/ngrok-stable-linux-amd64.zip && \
-    mv ngrok /usr/local/bin/
-
 COPY supervisord/supervisord.conf /etc/
 RUN install -d /var/log/supervisor/
 
@@ -24,6 +18,6 @@ RUN mv ./src/*.sh ./
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=10s --timeout=5s --retries=2 CMD ./healthcheck.sh
+HEALTHCHECK --interval=20s --timeout=5s --retries=2 CMD ./healthcheck.sh
 
 CMD [ "supervisord", "-c", "/etc/supervisord.conf" ]
