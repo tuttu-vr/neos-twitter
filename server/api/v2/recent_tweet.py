@@ -20,6 +20,7 @@ def process_messages(messages: List[Dict], start_time: str):
         local_time_str = utc_time.astimezone(TIMEZONE_LOCAL).strftime(DATETIME_FORMAT)
         try:
             return ';'.join([
+                'id=' + mes['message_id'].split('-')[1], # TODO keep original id in DB
                 'created_at=' + quote(local_time_str),
                 'name=' + quote(mes['name']),
                 'icon_url=' + quote(mes['icon_url']),

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 import traceback
 import datetime
 from logging import getLogger
@@ -31,7 +31,7 @@ class NeotterUser(Base):
 
     __tablename__ = 'neotter_users'
 
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         _dict = {col.name: getattr(self, col.name) for col in self.__table__.columns}
         return _dict
 
@@ -50,7 +50,7 @@ def delete_expired_users():
         session.close()
 
 
-def get_valid_users():
+def get_valid_users() -> List[NeotterUser]:
     current = datetime.datetime.utcnow().strftime(DATETIME_FORMAT)
     session = db.get_session()
     users = list(map(
@@ -58,3 +58,19 @@ def get_valid_users():
         session.query(NeotterUser).filter(NeotterUser.expired >= current)))
     session.close()
     return users
+
+
+def get_by_token(token: str) -> NeotterUser:
+    current = datetime.datetime.utcnow().strftime(DATETIME_FORMAT)
+    session = db.get_session()
+    user = session.query(NeotterUser) \
+        .filter(NeotterUser.token == token, NeotterUser.expired >= current).first()
+    session.close()
+    return user
+
+
+def get_by_session(session_id: str) -> NeotterUser:
+    session = db.get_session()
+    user = session.query(NeotterUser).filter(NeotterUser.session_id == session_id).first()
+    session.close()
+    return user

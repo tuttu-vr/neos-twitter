@@ -37,6 +37,7 @@ def _parse_response(response: str):
     for mes in message_list:
         message_data = {key: value for key, value in map(lambda m: tuple(m.split('=')), mes.split(';'))}
         message = {
+            'id': int(message_data['id']),
             'created_at': datetime.datetime.strptime(unquote(message_data['created_at']), DATETIME_FORMAT)
                 .replace(tzinfo=TIMEZONE_JST).astimezone(TIMEZONE_UTC).strftime(DATETIME_FORMAT),
             'user.name': unquote(message_data['name']),

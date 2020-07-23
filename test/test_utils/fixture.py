@@ -77,6 +77,7 @@ def _response_from_fixture_v1(tweet: dict):
 def _response_from_fixture_v2(tweet: dict):
     datetime_format = '%a %b %d %H:%M:%S %z %Y'
     return {
+        'id': tweet['id'],
         'created_at': datetime.datetime.strptime(tweet['created_at'], datetime_format)
             .strftime(DATETIME_FORMAT),
         'user.name': '%s@%s' % (tweet['user']['name'], tweet['user']['screen_name']),
