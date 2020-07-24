@@ -19,6 +19,7 @@ def parse_message(mes: str) -> dict:
         'user.name': unquote(message_data['name']),
         'user.id': message_data['user_id'],
         'user.profile_image_url_https': unquote(message_data['icon_url']),
+        'tweet_url': unquote(message_data['tweet_url']),
         'media': list(map(unquote, message_data['attachments'].split(','))),
         'text': unquote(message_data['message']),
         'favorite_count': int(message_data['favorite_count']),

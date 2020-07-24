@@ -16,22 +16,26 @@ DELIMITER = TWEET_DELIMITER
 TIMEZONE_LOCAL = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
 TIMEZONE_UTC = datetime.timezone(datetime.timedelta(hours=+0), 'UTC')
 
+TWEET_URL_TEMPLATE = 'https://twitter.com/%s/status/%s'
 
 def _process_messages(messages: List[Dict]) -> List[str]:
     def process_message(mes):
         utc_time = datetime.datetime.strptime(mes['created_datetime'], DATETIME_FORMAT).replace(tzinfo=TIMEZONE_UTC)
         local_time_str = utc_time.astimezone(TIMEZONE_LOCAL).strftime(DATETIME_FORMAT)
         try:
+            screen_name = mes['name'].split('@')[-1]
+            tweet_id = mes['message_id'].split('-')[1]
             return ';'.join([
-                'id=' + mes['message_id'].split('-')[1], # TODO keep original id on DB
-                'created_at=' + quote(local_time_str),
-                'name=' + quote(mes['name']),
-                'user_id=' + mes['user_id'],
-                'icon_url=' + quote(mes['icon_url']),
-                'attachments=' + (quote(mes['attachments']) if mes['attachments'] else ''),
-                'message=' + mes['message'],
+                'id='           + tweet_id, # TODO keep original id on DB
+                'created_at='   + quote(local_time_str),
+                'name='         + quote(mes['name']),
+                'user_id='      + mes['user_id'],
+                'icon_url='     + quote(mes['icon_url']),
+                'tweet_url='    + quote(TWEET_URL_TEMPLATE % (screen_name, tweet_id)),
+                'attachments='  + (quote(mes['attachments']) if mes['attachments'] else ''),
+                'message='      + mes['message'],
                 'favorite_count=%d' % mes['favorite_count'],
-                'retweet_count=%d' % mes['retweet_count'],
+                'retweet_count=%d'  % mes['retweet_count'],
                 'favorited=' + str(mes['favorited']),
                 'retweeted=' + str(mes['retweeted'])
             ])
