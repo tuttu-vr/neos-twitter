@@ -76,6 +76,7 @@ def _response_from_fixture_v1(tweet: dict):
 
 def _response_from_fixture_v2(tweet: dict):
     datetime_format = '%a %b %d %H:%M:%S %z %Y'
+    tweet_url_template = 'https://twitter.com/%s/status/%d'
     return {
         'id': tweet['id'],
         'created_at': datetime.datetime.strptime(tweet['created_at'], datetime_format)
@@ -83,6 +84,7 @@ def _response_from_fixture_v2(tweet: dict):
         'user.name': '%s@%s' % (tweet['user']['name'], tweet['user']['screen_name']),
         'user.id': tweet['user']['id_str'],
         'user.profile_image_url_https': tweet['user']['profile_image_url_https'],
+        'tweet_url': tweet_url_template % (tweet['user']['screen_name'], tweet['id']),
         'media': tweet['media'],
         'text': tweet['text'],
         'favorite_count': tweet['favorite_count'],
