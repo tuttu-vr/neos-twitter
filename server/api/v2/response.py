@@ -6,6 +6,7 @@ from logging import getLogger
 
 from lib import twitter
 from lib.settings import TWEET_DELIMITER, DATETIME_FORMAT
+from lib.model_utils import messages as mes_lib
 from common.models.neotter_user import NeotterUser
 from common.models.twitter_user import TwitterUser
 
@@ -72,6 +73,11 @@ def get_recent_response(messages: List[Dict], start_time: str) -> str:
     text_list = _process_messages(messages)
     text_list_str = DELIMITER.join(text_list)
     return f'{start_time}|{len(text_list)}|{text_list_str}'
+
+
+def get_home_timeline(user: NeotterUser, from_id: str=0, count: int=10) -> str:
+    timeline = mes_lib.get_timeline_messages(user.id, from_id, count)
+    return _join_to_str(timeline)
 
 
 def get_status_list(status_id_list_str: str, user: NeotterUser) -> str:

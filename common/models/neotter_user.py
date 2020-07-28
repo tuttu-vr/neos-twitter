@@ -7,7 +7,7 @@ from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import OperationalError, InternalError
 
-from common.lib import db, crypt
+from common.lib import db, crypt, datetime_utils
 from common import configs
 
 DATETIME_FORMAT = configs.datetime_format
@@ -77,3 +77,12 @@ def get_by_session(session_id: str) -> NeotterUser:
     user = session.query(NeotterUser).filter(NeotterUser.session_id == session_id).first()
     session.close()
     return user
+
+
+def extend_expiration(user_id: str):
+    session = db.get_session()
+    user = session.query(NeotterUser).filter(NeotterUser.id == user_id).first()
+    new_expired = datetime_utils.day_after(configs.auth_expiration_date)
+    user.expired = datetime_utils.datetime_to_neotter_inner(new_expired)
+    session.commit()
+    session.close()

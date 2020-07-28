@@ -70,7 +70,7 @@ def _response_from_fixture_v1(tweet: dict):
         'user.name': '%s@%s' % (tweet['user']['name'], tweet['user']['screen_name']),
         'user.profile_image_url_https': tweet['user']['profile_image_url_https'],
         'media': tweet['media'],
-        'text': tweet['text']
+        'text': tweet['full_text']
     }
 
 
@@ -86,7 +86,7 @@ def _response_from_fixture_v2(tweet: dict):
         'user.profile_image_url_https': tweet['user']['profile_image_url_https'],
         'tweet_url': tweet_url_template % (tweet['user']['screen_name'], tweet['id']),
         'media': tweet['media'],
-        'text': tweet['text'],
+        'text': tweet['full_text'],
         'favorite_count': tweet['favorite_count'],
         'retweet_count': tweet['retweet_count'],
         'favorited': str(tweet['favorited']),
