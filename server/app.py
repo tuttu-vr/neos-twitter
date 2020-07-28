@@ -112,6 +112,7 @@ def _get_recent(count: int, offset: int, start_time: str, user_token: str, remot
 
 @app.route('/recent')
 def get_recent():
+    # deprecated
     count      = request.args.get('count', default=3, type=int)
     offset     = request.args.get('offset', default=0, type=int)
     start_time = request.args.get('start_time', default=None, type=str)
@@ -122,12 +123,34 @@ def get_recent():
 
 @app.route('/api/v2/recent')
 def get_recent_v2():
+    # deprecated
     count      = request.args.get('count', default=3, type=int)
     offset     = request.args.get('offset', default=0, type=int)
     start_time = request.args.get('start_time', default=None, type=str)
     user_token = request.args.get('key', default=None, type=str)
     remote_addr= _get_remote_addr(request)
     return _get_recent(count, offset, start_time, user_token, remote_addr, version='v2')
+
+
+def _get_home_timeline(user: neotter_user.NeotterUser, from_id: int, count: int):
+    try:
+        neotter_user.extend_expiration(user.id)
+        return api.v2.response.get_home_timeline(user, from_id, count)
+    except ValueError as e:
+        return str(e), 400
+
+
+@app.route('/api/v2/home-timeline')
+def get_home_timeline():
+    count      = request.args.get('count', default=3, type=int)
+    from_id    = request.args.get('from_id', default=None, type=str)
+    user_token = request.args.get('key', default=None, type=str)
+    remote_addr= _get_remote_addr(request)
+    try:
+        user = _get_user(user_token, remote_addr)
+    except ValueError as e:
+        return str(e), 400
+    return _get_home_timeline(user, from_id, count)
 
 
 @app.route('/api/v2/status-list')

@@ -47,12 +47,12 @@ class Tweet(Base):
 
         tweet = Tweet(
             message_id = f'{neotter_user_id}-{status.id}',
-            message = quote(status.text),
+            message = quote(status.full_text),
             user_id = status.user.id_str,
             created_datetime = created_at,
             neotter_user_id = neotter_user_id,
             favorite_count = status.favorite_count,
-            retweet_count = status.retweeted,
+            retweet_count = status.retweet_count,
             favorited = status.favorited,
             retweeted = status.retweeted
         )
@@ -66,7 +66,7 @@ class Tweet(Base):
 
     @classmethod
     def deprecated_filters(cls, status: Status):
-        return not status.text.startswith('RT ')
+        return not status.full_text.startswith('RT ')
 
     def to_dict(self):
         _dict = {col.name: getattr(self, col.name) for col in self.__table__.columns}
