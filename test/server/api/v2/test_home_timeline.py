@@ -48,20 +48,11 @@ class TestHomeTimeline(unittest.TestCase):
                 .replace(tzinfo=TIMEZONE_UTC)
             self.assertLessEqual(abs(expected_expiration - got_expiration), datetime.timedelta(minutes=1))
 
-    def test_home_timeline(self):
-        count = 3
-        from_id = 1002
+    def _test_home_timeline(self, params: dict, expected: dict):
+        count = params['count']
+        from_id = params['from_id']
         table_name = 'neotter_users'
         results = {}
-        expected = {
-            '01': [
-                fixture.response_from_fixture(self.tweets['01'][2], version='v2'),
-                fixture.response_from_fixture(self.tweets['01'][3], version='v2')
-            ],
-            '02': [
-                fixture.response_from_fixture(self.tweets['02'][1], version='v2')
-            ]
-        }
         for user in self.db_data[table_name]:
             user_token = user['token']
             n_user = neotter_user.get_by_token(user_token)
@@ -76,3 +67,35 @@ class TestHomeTimeline(unittest.TestCase):
             expected_data = expected[user['id']]
             self.assertEqual(parsed, expected_data)
         print(json.dumps(results, ensure_ascii=False, indent=4))
+
+    def test_home_timeline(self):
+        params_1 = {
+            'count': 2,
+            'from_id': 1002
+        }
+        expected_1 = {
+            '01': [
+                fixture.response_from_fixture(self.tweets['01'][2], version='v2'),
+                fixture.response_from_fixture(self.tweets['01'][3], version='v2')
+            ],
+            '02': [
+                fixture.response_from_fixture(self.tweets['02'][1], version='v2')
+            ]
+        }
+        self._test_home_timeline(params_1, expected_1)
+
+        params_2 = {
+            'count': 2,
+            'from_id': 0
+        }
+        expected_2 = {
+            '01': [
+                fixture.response_from_fixture(self.tweets['01'][2], version='v2'),
+                fixture.response_from_fixture(self.tweets['01'][3], version='v2')
+            ],
+            '02': [
+                fixture.response_from_fixture(self.tweets['02'][0], version='v2'),
+                fixture.response_from_fixture(self.tweets['02'][1], version='v2'),
+            ]
+        }
+        self._test_home_timeline(params_2, expected_2)

@@ -38,15 +38,15 @@ def get_recent_messages(count: int, offset: int, start_time: str, user_id: str):
 def get_timeline_messages(user_id: str, from_id: str=0, count: int=10):
     session = db.get_session()
     try:
-        from_id_db = f'{user_id}-{from_id}'
         messages = session.query(Tweet, TwitterUser) \
             .join(TwitterUser, and_(Tweet.user_id == TwitterUser.user_id, Tweet.client == TwitterUser.client))
         if from_id:
+            from_id_db = f'{user_id}-{from_id}'
             messages = messages.filter(Tweet.neotter_user_id == user_id, Tweet.message_id > from_id_db) \
-                .order_by(Tweet.created_datetime).limit(count)
+                .order_by(Tweet.created_datetime).limit(count).all()
         else:
-            messages = messages.filter(Tweet.neotter_user_id == user_id) \
-                .order_by(desc(Tweet.created_datetime)).limit(count)
+            messages = reversed(messages.filter(Tweet.neotter_user_id == user_id) \
+                .order_by(desc(Tweet.created_datetime)).limit(count).all())
     except (OperationalError, InternalError):
         logger.error(traceback.format_exc())
     finally:
