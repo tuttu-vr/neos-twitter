@@ -1,6 +1,8 @@
+import traceback
 from typing import List, Dict
 from logging import getLogger
 from urllib.parse import quote
+from twitter import TwitterError
 
 from common.models.neotter_user import NeotterUser
 from common.models.tweet import Tweet
@@ -67,3 +69,23 @@ def get_search_result(user: NeotterUser, search_query: str) -> List[Dict]:
     api = _api_by_user(user)
     search_result = api.GetSearch(**query)
     return _statuses_to_dict_list(search_result, user.id)
+
+
+def post_message(user: NeotterUser, message: str, media_url_list: List[str]):
+    api = _api_by_user(user)
+    try:
+        status = api.PostUpdate(message, media=media_url_list)
+    except TwitterError:
+        logger.error(traceback.format_exc())
+        raise ValueError('Failed to post message to twitter')
+    return status
+
+
+def like_message(user: NeotterUser, message_id: str):
+    api = _api_by_user(user)
+    try:
+        status = api.CreateFavorite(status_id=message_id)
+    except TwitterError:
+        logger.error(traceback.format_exc())
+        raise ValueError(f'Failed to like message: id={message_id}')
+    return status

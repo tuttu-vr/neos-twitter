@@ -6,6 +6,7 @@ from requests.exceptions import ConnectionError
 from urllib.parse import quote
 from logging import getLogger, DEBUG, INFO
 from flask import Flask, request, render_template, redirect, url_for, session
+from werkzeug.exceptions import BadRequestKeyError
 
 from lib import oauth, db_write
 from lib.session import validate_token, generate_new_session, validate_session_id
@@ -16,6 +17,7 @@ from common.lib import crypt
 from common.models import neotter_user
 
 import api.v2.response
+import api.v2.creation
 
 app = Flask(__name__)
 logger = getLogger(__name__)
@@ -198,6 +200,45 @@ def login():
         logger.error(traceback.format_exc())
         return 'Failed to access twitter. Please try again later.', 503
     return render_template('login.html', endpoint=endpoint, title='Neotter login')
+
+
+@app.route('/api/v2/message', methods=['POST'])
+def create_message():
+    try:
+        message    = request.form['message']
+        user_token = request.form['key']
+        media      = request.form.get('media')
+        remote_addr= _get_remote_addr(request)
+    except BadRequestKeyError:
+        logger.error(traceback.format_exc())
+        return 'Missing parameter', 400
+    if not media:
+        media_url_list = []
+    else:
+        media_url_list = media.split(',')
+
+    try:
+        user = _get_user(user_token, remote_addr)
+        return api.v2.creation.message(user, message, media_url_list)
+    except ValueError as e:
+        return str(e), 400
+
+
+@app.route('/api/v2/like', methods=['POST'])
+def add_like_reaction():
+    try:
+        message_id    = request.form['message_id']
+        user_token = request.form['key']
+        remote_addr= _get_remote_addr(request)
+    except BadRequestKeyError:
+        logger.error(traceback.format_exc())
+        return 'Missing parameter', 400
+
+    try:
+        user = _get_user(user_token, remote_addr)
+        return api.v2.creation.like(user, message_id)
+    except ValueError as e:
+        return str(e), 400
 
 
 @app.route('/register')
