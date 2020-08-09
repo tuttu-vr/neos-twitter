@@ -240,6 +240,23 @@ def add_like_reaction():
         return str(e), 400
 
 
+@app.route('/api/v2/retweet', methods=['POST'])
+def retweet_tweet():
+    try:
+        message_id    = request.form['message_id']
+        user_token = request.form['key']
+        remote_addr= _get_remote_addr(request)
+    except BadRequestKeyError:
+        logger.error(traceback.format_exc())
+        return 'Missing parameter', 400
+
+    try:
+        user = _get_user(user_token, remote_addr)
+        return api.v2.response.create_retweet(user, message_id)
+    except ValueError as e:
+        return str(e), 400
+
+
 @app.route('/register')
 def register():
     oauth_token = request.args.get('oauth_token')
