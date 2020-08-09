@@ -19,33 +19,36 @@ TIMEZONE_UTC = datetime.timezone(datetime.timedelta(hours=+0), 'UTC')
 
 TWEET_URL_TEMPLATE = 'https://twitter.com/%s/status/%s'
 
-def _process_messages(messages: List[Dict]) -> List[str]:
-    def process_message(mes):
-        utc_time = datetime.datetime.strptime(mes['created_datetime'], DATETIME_FORMAT).replace(tzinfo=TIMEZONE_UTC)
-        local_time_str = utc_time.astimezone(TIMEZONE_LOCAL).strftime(DATETIME_FORMAT)
-        try:
-            screen_name = mes['name'].split('@')[-1]
-            tweet_id = mes['message_id'].split('-')[1]
-            return ';'.join([
-                'id='           + tweet_id, # TODO keep original id on DB
-                'created_at='   + quote(local_time_str),
-                'name='         + quote(mes['name']),
-                'user_id='      + mes['user_id'],
-                'icon_url='     + quote(mes['icon_url']),
-                'tweet_url='    + quote(TWEET_URL_TEMPLATE % (screen_name, tweet_id)),
-                'attachments='  + (quote(mes['attachments']) if mes['attachments'] else ''),
-                'message='      + mes['message'],
-                'favorite_count=%d' % mes['favorite_count'],
-                'retweet_count=%d'  % mes['retweet_count'],
-                'favorited=' + str(mes['favorited']),
-                'retweeted=' + str(mes['retweeted'])
-            ])
-        except TypeError:
-            logger.error(traceback.format_exc())
-            for key in mes.keys():
-                logger.error('%s=%s' % (key, str(mes[key])))
-            return None
-    text_list = list(filter(lambda x: x, [process_message(mes) for mes in messages]))
+
+def _process_message(mes: dict) -> str:
+    utc_time = datetime.datetime.strptime(mes['created_datetime'], DATETIME_FORMAT).replace(tzinfo=TIMEZONE_UTC)
+    local_time_str = utc_time.astimezone(TIMEZONE_LOCAL).strftime(DATETIME_FORMAT)
+    try:
+        screen_name = mes['name'].split('@')[-1]
+        tweet_id = mes['message_id'].split('-')[1]
+        return ';'.join([
+            'id='           + tweet_id, # TODO keep original id on DB
+            'created_at='   + quote(local_time_str),
+            'name='         + quote(mes['name']),
+            'user_id='      + mes['user_id'],
+            'icon_url='     + quote(mes['icon_url']),
+            'tweet_url='    + quote(TWEET_URL_TEMPLATE % (screen_name, tweet_id)),
+            'attachments='  + (quote(mes['attachments']) if mes['attachments'] else ''),
+            'message='      + mes['message'],
+            'favorite_count=%d' % mes['favorite_count'],
+            'retweet_count=%d'  % mes['retweet_count'],
+            'favorited=' + str(mes['favorited']),
+            'retweeted=' + str(mes['retweeted'])
+        ])
+    except TypeError:
+        logger.error(traceback.format_exc())
+        for key in mes.keys():
+            logger.error('%s=%s' % (key, str(mes[key])))
+        return None
+
+
+def _process_messages(messages: List[dict]) -> List[str]:
+    text_list = list(filter(lambda x: x, [_process_message(mes) for mes in messages]))
     return text_list
 
 
@@ -100,3 +103,22 @@ def get_search_result(user: NeotterUser, query: str) -> str:
     logger.info('Search query: %s by %s' % (query, user.name))
     search_result = twitter.get_search_result(user, query)
     return _join_to_str(search_result)
+
+
+def create_message(user: NeotterUser, message: str, media_list: List[str]):
+    # TODO validate url
+    status = twitter.post_message(user, message, media_list)
+    logger.debug(status)
+    if status: # TODO check status
+        return _process_message(status)
+    else:
+        raise ValueError('Something went wrong. Please check your twitter status.')
+
+
+def create_like(user: NeotterUser, message_id: str):
+    status = twitter.like_message(user, message_id)
+    logger.debug(status)
+    if status:
+        return _process_message(status)
+    else:
+        raise ValueError('Something went wrong. Please check your twitter status.')

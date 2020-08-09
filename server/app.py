@@ -17,7 +17,6 @@ from common.lib import crypt
 from common.models import neotter_user
 
 import api.v2.response
-import api.v2.creation
 
 app = Flask(__name__)
 logger = getLogger(__name__)
@@ -219,7 +218,7 @@ def create_message():
 
     try:
         user = _get_user(user_token, remote_addr)
-        return api.v2.creation.message(user, message, media_url_list)
+        return api.v2.response.create_message(user, message, media_url_list)
     except ValueError as e:
         return str(e), 400
 
@@ -236,7 +235,7 @@ def add_like_reaction():
 
     try:
         user = _get_user(user_token, remote_addr)
-        return api.v2.creation.like(user, message_id)
+        return api.v2.response.create_like(user, message_id)
     except ValueError as e:
         return str(e), 400
 
