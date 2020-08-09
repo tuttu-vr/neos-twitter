@@ -27,17 +27,22 @@ def _api_by_user(user: NeotterUser):
     return twitter.get_twitter_api(access_key, access_secret)
 
 
+def _merge_status_and_user(status, neotter_user_id: str) -> dict:
+    tweet = Tweet.create(status, neotter_user_id, contain_retweet=True)
+    if not tweet:
+        return None
+    user = TwitterUser.create(status.user).to_dict()
+    user.update(tweet.to_dict())
+    return user
+
+
 def _statuses_to_dict_list(status_list_raw: list, neotter_user_id: str) -> List[Dict]:
     # need to be tested
     # neotter_user_id is not used
     status_list = []
     for status in status_list_raw:
-        tweet = Tweet.create(status, neotter_user_id, contain_retweet=True)
-        if not tweet:
-            continue
-        user = TwitterUser.create(status.user).to_dict()
-        user.update(tweet.to_dict())
-        status_list.append(user)
+        merged = _merge_status_and_user(status, neotter_user_id)
+        status_list.append(merged)
     return status_list
 
 
@@ -75,17 +80,25 @@ def post_message(user: NeotterUser, message: str, media_url_list: List[str]):
     api = _api_by_user(user)
     try:
         status = api.PostUpdate(message, media=media_url_list)
+        logger.debug(status)
+        if status.full_text is None:
+            status.full_text = status.text
+        tweet = _merge_status_and_user(status, user.id)
     except TwitterError:
         logger.error(traceback.format_exc())
         raise ValueError('Failed to post message to twitter')
-    return status
+    return tweet
 
 
 def like_message(user: NeotterUser, message_id: str):
     api = _api_by_user(user)
     try:
         status = api.CreateFavorite(status_id=message_id)
+        logger.debug(status)
+        if status.full_text is None:
+            status.full_text = status.text
+        tweet = _merge_status_and_user(status, user.id)
     except TwitterError:
         logger.error(traceback.format_exc())
         raise ValueError(f'Failed to like message: id={message_id}')
-    return status
+    return tweet
