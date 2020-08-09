@@ -80,7 +80,6 @@ def post_message(user: NeotterUser, message: str, media_url_list: List[str]):
     api = _api_by_user(user)
     try:
         status = api.PostUpdate(message, media=media_url_list)
-        logger.debug(status)
         if status.full_text is None:
             status.full_text = status.text
         tweet = _merge_status_and_user(status, user.id)
@@ -94,11 +93,23 @@ def like_message(user: NeotterUser, message_id: str):
     api = _api_by_user(user)
     try:
         status = api.CreateFavorite(status_id=message_id)
-        logger.debug(status)
         if status.full_text is None:
             status.full_text = status.text
         tweet = _merge_status_and_user(status, user.id)
     except TwitterError:
         logger.error(traceback.format_exc())
         raise ValueError(f'Failed to like message: id={message_id}')
+    return tweet
+
+
+def retweet_message(user: NeotterUser, message_id: str):
+    api = _api_by_user(user)
+    try:
+        status = api.PostRetweet(message_id)
+        if status.full_text is None:
+            status.full_text = status.text
+        tweet = _merge_status_and_user(status, user.id)
+    except TwitterError:
+        logger.error(traceback.format_exc())
+        raise ValueError(f'Failed to retweet message: id={message_id}')
     return tweet

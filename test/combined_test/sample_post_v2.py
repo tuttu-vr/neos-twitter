@@ -30,6 +30,15 @@ def like_tweet(key: str, message_id: str):
     logger.info(response.text)
 
 
+def retweet_tweet(key: str, message_id: str):
+    params = {
+        'message_id': message_id,
+        'key': key
+    }
+    response = requests.post(endpoint + 'retweet', params)
+    logger.info(response.text)
+
+
 def load_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('key')
@@ -38,8 +47,9 @@ def load_args():
 
 if __name__ == '__main__':
     args = load_args()
-    post_tweet(args.key, '画像テスト2', [
-        'https://placehold.jp/150x150.png',
-        'http://placehold.jp/24/cc9999/993333/150x100.png'
-    ])
+    # post_tweet(args.key, '画像テスト2', [
+    #     'https://placehold.jp/150x150.png',
+    #     'http://placehold.jp/24/cc9999/993333/150x100.png'
+    # ])
     # like_tweet(args.key, 'xxxxxx')
+    retweet_tweet(args.key, 'xxxxxx')
