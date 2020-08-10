@@ -8,7 +8,7 @@ from logging import getLogger, DEBUG, INFO
 from flask import Flask, request, render_template, redirect, url_for, session
 from werkzeug.exceptions import BadRequestKeyError
 
-from lib import oauth, db_write
+from lib import oauth, db_write, notification
 from lib.session import validate_token, generate_new_session, validate_session_id
 from lib.settings import logging_config, get_arguments, TWEET_DELIMITER
 from lib.model_utils.messages import get_recent_messages
@@ -184,6 +184,8 @@ def get_search_result():
     user_token   = request.args.get('key', default=None, type=str)
     remote_addr  = _get_remote_addr(request)
     logger.debug(search_query)
+    if not search_query:
+        return 'Error: No search query.', 400
     try:
         user = _get_user(user_token, remote_addr)
         return api.v2.response.get_search_result(user, search_query)
@@ -312,6 +314,14 @@ def generate_neotter_token():
 @app.route('/health')
 def healthcheck():
     return 'OK'
+
+
+@app.errorhandler(Exception)
+def handle_500(e):
+    remote_addr = _get_remote_addr(request)
+    error_log = f'{request.url}\n{remote_addr}\n{traceback.format_exc()}'
+    notification.send_message(error_log)
+    return 'Something went wrong. Check params and try again.', 500
 
 
 if __name__ == '__main__':

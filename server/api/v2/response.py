@@ -66,6 +66,8 @@ def _process_profile(twitter_user_raw: dict):
         'description': 'description'
     }
     user_dict = twitter_user_raw.AsDict()
+    if 'profile_banner_url' not in user_dict:
+        user_dict['profile_banner_url'] = 'https://placehold.jp/1500x500.png'
     result = ';'.join([
         f'{neotter_key}={quote(user_dict[key])}' for key, neotter_key in parameters.items()
     ])
@@ -124,7 +126,7 @@ def create_message(user: NeotterUser, message: str, media_list: List[str]):
 def create_like(user: NeotterUser, message_id: str):
     status = twitter.like_message(user, message_id)
     if status:
-        return _process_message(status)
+        return _process_message(status, blacklist=['message', 'attachments'])
     else:
         raise ValueError(MESSAGE_ERROR_POST)
 
@@ -132,6 +134,6 @@ def create_like(user: NeotterUser, message_id: str):
 def create_retweet(user: NeotterUser, message_id: str):
     status = twitter.retweet_message(user, message_id)
     if status:
-        return _process_message(status)
+        return _process_message(status, blacklist=['message', 'attachments'])
     else:
         raise ValueError(MESSAGE_ERROR_POST)
