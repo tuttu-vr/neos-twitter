@@ -2,6 +2,7 @@ from logging import getLogger
 import traceback
 from sqlalchemy import and_, desc
 from sqlalchemy.exc import OperationalError, InternalError
+from twitter import Status
 
 from common.models.tweet import Tweet
 from common.models.twitter_user import TwitterUser
@@ -52,3 +53,15 @@ def get_timeline_messages(user_id: str, from_id: str=0, count: int=10):
     finally:
         session.close()
     return _merge_result(messages)
+
+
+def extract_tweet_and_user(
+        status: Status, neotter_user_id: str, extract_retweet: bool=True) -> (Tweet, TwitterUser):
+    if extract_retweet and status.retweeted_status:
+        logger.debug(status.retweeted_status)
+        status = status.retweeted_status
+    tweet = Tweet.create(status, neotter_user_id)
+    if not tweet:
+        return None, None
+    user = TwitterUser.create(status.user)
+    return tweet, user

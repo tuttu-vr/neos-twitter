@@ -122,4 +122,6 @@ class TestStatus:
         for key, value in data.items():
             if key == 'user':
                 value = TestUser(**value)
+            if key == 'retweeted_status' and value is not None:
+                value = TestStatus(value)
             setattr(self, key, value)

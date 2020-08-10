@@ -9,6 +9,7 @@ from common.models.tweet import Tweet
 from common.models.twitter_user import TwitterUser
 from common.lib import twitter
 from lib.settings import TWEET_DELIMITER
+from lib.model_utils.messages import extract_tweet_and_user
 
 from api.v2 import response
 
@@ -28,21 +29,23 @@ def _api_by_user(user: NeotterUser):
 
 
 def _merge_status_and_user(status, neotter_user_id: str) -> dict:
-    tweet = Tweet.create(status, neotter_user_id, contain_retweet=True)
-    if not tweet:
-        return None
-    user = TwitterUser.create(status.user).to_dict()
-    user.update(tweet.to_dict())
-    return user
+    tweet, user = extract_tweet_and_user(status, neotter_user_id)
+    response = user.to_dict()
+    response.update(tweet.to_dict())
+    return response
 
 
-def _statuses_to_dict_list(status_list_raw: list, neotter_user_id: str) -> List[Dict]:
+def _statuses_to_dict_list(status_list_raw: list, neotter_user_id: str, distinct: bool=False) -> List[Dict]:
     # need to be tested
     # neotter_user_id is not used
+    uniques = set()
     status_list = []
     for status in status_list_raw:
         merged = _merge_status_and_user(status, neotter_user_id)
+        if distinct and merged['message_id'] in uniques:
+            continue
         status_list.append(merged)
+        uniques.add(merged['message_id'])
     return status_list
 
 
@@ -73,7 +76,7 @@ def get_search_result(user: NeotterUser, search_query: str) -> List[Dict]:
     }
     api = _api_by_user(user)
     search_result = api.GetSearch(**query)
-    return _statuses_to_dict_list(search_result, user.id)
+    return _statuses_to_dict_list(search_result, user.id, distinct=True)
 
 
 def post_message(user: NeotterUser, message: str, media_url_list: List[str]):
