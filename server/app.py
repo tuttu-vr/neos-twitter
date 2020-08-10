@@ -6,7 +6,7 @@ from requests.exceptions import ConnectionError
 from urllib.parse import quote
 from logging import getLogger, DEBUG, INFO
 from flask import Flask, request, render_template, redirect, url_for, session
-from werkzeug.exceptions import BadRequestKeyError, InternalServerError
+from werkzeug.exceptions import BadRequestKeyError
 
 from lib import oauth, db_write, notification
 from lib.session import validate_token, generate_new_session, validate_session_id
