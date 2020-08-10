@@ -6,7 +6,7 @@ from requests.exceptions import ConnectionError
 from urllib.parse import quote
 from logging import getLogger, DEBUG, INFO
 from flask import Flask, request, render_template, redirect, url_for, session
-from werkzeug.exceptions import BadRequestKeyError
+from werkzeug.exceptions import BadRequestKeyError, BadRequest, InternalServerError
 
 from lib import oauth, db_write, notification
 from lib.session import validate_token, generate_new_session, validate_session_id
@@ -97,11 +97,8 @@ message_processer = {
 }
 
 def _get_recent(count: int, offset: int, start_time: str, user_token: str, remote_addr: str, version: str='v1'):
-    try:
-        user = _get_user(user_token, remote_addr).to_dict()
-        start_time, start_time_utc = _get_start_time(start_time)
-    except ValueError as e:
-        return str(e), 400
+    user = _get_user(user_token, remote_addr).to_dict()
+    start_time, start_time_utc = _get_start_time(start_time)
 
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
 
@@ -134,11 +131,8 @@ def get_recent_v2():
 
 
 def _get_home_timeline(user: neotter_user.NeotterUser, from_id: int, count: int):
-    try:
-        neotter_user.extend_expiration(user.id)
-        return api.v2.response.get_home_timeline(user, from_id, count)
-    except ValueError as e:
-        return str(e), 400
+    neotter_user.extend_expiration(user.id)
+    return api.v2.response.get_home_timeline(user, from_id, count)
 
 
 @app.route('/api/v2/home-timeline')
@@ -147,10 +141,7 @@ def get_home_timeline():
     from_id    = request.args.get('from_id', default=None, type=str)
     user_token = request.args.get('key', default=None, type=str)
     remote_addr= _get_remote_addr(request)
-    try:
-        user = _get_user(user_token, remote_addr)
-    except ValueError as e:
-        return str(e), 400
+    user = _get_user(user_token, remote_addr)
     return _get_home_timeline(user, from_id, count)
 
 
@@ -159,11 +150,8 @@ def get_status_list():
     request_status_id = request.args.get('status_ids', default='', type=str)
     user_token        = request.args.get('key', default=None, type=str)
     remote_addr       = _get_remote_addr(request)
-    try:
-        user = _get_user(user_token, remote_addr)
-        return api.v2.response.get_status_list(request_status_id, user)
-    except ValueError as e:
-        return str(e), 400
+    user = _get_user(user_token, remote_addr)
+    return api.v2.response.get_status_list(request_status_id, user)
 
 
 @app.route('/api/v2/user-timeline')
@@ -171,11 +159,8 @@ def get_user_timeline():
     twitter_user_id = request.args.get('user_id', default=None, type=str)
     user_token      = request.args.get('key', default=None, type=str)
     remote_addr     = _get_remote_addr(request)
-    try:
-        user = _get_user(user_token, remote_addr)
-        return api.v2.response.get_user_timeline(user, twitter_user_id)
-    except ValueError as e:
-        return str(e), 400
+    user = _get_user(user_token, remote_addr)
+    return api.v2.response.get_user_timeline(user, twitter_user_id)
 
 
 @app.route('/api/v2/search-result')
@@ -185,12 +170,9 @@ def get_search_result():
     remote_addr  = _get_remote_addr(request)
     logger.debug(search_query)
     if not search_query:
-        return 'Error: No search query.', 400
-    try:
-        user = _get_user(user_token, remote_addr)
-        return api.v2.response.get_search_result(user, search_query)
-    except ValueError as e:
-        return str(e), 400
+        raise BadRequest('Error: No search query.')
+    user = _get_user(user_token, remote_addr)
+    return api.v2.response.get_search_result(user, search_query)
 
 
 @app.route('/login')
@@ -199,7 +181,7 @@ def login():
         endpoint = oauth.get_authenticate_endpoint()
     except ConnectionError:
         logger.error(traceback.format_exc())
-        return 'Failed to access twitter. Please try again later.', 503
+        raise InternalServerError('Failed to access twitter. Please try again later.')
     return render_template('login.html', endpoint=endpoint, title='Neotter login')
 
 
@@ -212,17 +194,14 @@ def create_message():
         remote_addr= _get_remote_addr(request)
     except BadRequestKeyError:
         logger.error(traceback.format_exc())
-        return 'Missing parameter', 400
+        raise BadRequest('Missing parameter')
     if not media:
         media_url_list = []
     else:
         media_url_list = media.split(',')
 
-    try:
-        user = _get_user(user_token, remote_addr)
-        return api.v2.response.create_message(user, message, media_url_list)
-    except ValueError as e:
-        return str(e), 400
+    user = _get_user(user_token, remote_addr)
+    return api.v2.response.create_message(user, message, media_url_list)
 
 
 @app.route('/api/v2/like', methods=['POST'])
@@ -233,13 +212,10 @@ def add_like_reaction():
         remote_addr= _get_remote_addr(request)
     except BadRequestKeyError:
         logger.error(traceback.format_exc())
-        return 'Missing parameter', 400
+        raise BadRequest('Missing parameter')
 
-    try:
-        user = _get_user(user_token, remote_addr)
-        return api.v2.response.create_like(user, message_id)
-    except ValueError as e:
-        return str(e), 400
+    user = _get_user(user_token, remote_addr)
+    return api.v2.response.create_like(user, message_id)
 
 
 @app.route('/api/v2/retweet', methods=['POST'])
@@ -250,13 +226,10 @@ def retweet_tweet():
         remote_addr= _get_remote_addr(request)
     except BadRequestKeyError:
         logger.error(traceback.format_exc())
-        return 'Missing parameter', 400
+        raise BadRequest('Missing parameter')
 
-    try:
-        user = _get_user(user_token, remote_addr)
-        return api.v2.response.create_retweet(user, message_id)
-    except ValueError as e:
-        return str(e), 400
+    user = _get_user(user_token, remote_addr)
+    return api.v2.response.create_retweet(user, message_id)
 
 
 @app.route('/register')
@@ -283,7 +256,7 @@ def register():
     try:
         db_write.register_user(neotter_user)
     except ValueError as e:
-        return str(e), 503
+        raise InternalServerError(str(e))
     session_id = new_session_info['session_id']
     session['session_id'] = session_id
     session['name'] = user_data['screen_name']
@@ -322,16 +295,22 @@ def _error_notification(request):
     notification.send_message(error_log)
 
 
-@app.errorhandler(503)
-def handle_503(e):
+@app.errorhandler(ValueError)
+def handle_value_error(e: ValueError):
     _error_notification(request)
-    return 'Something went wrong. Check params and try again.', 503
+    return str(e), 400
 
 
-@app.errorhandler(500)
-def handle_500(e):
+@app.errorhandler(InternalServerError)
+def handle_server_error(e: InternalServerError):
     _error_notification(request)
-    return 'Something went wrong. Check params and try again.', 500
+    return str(e.get_description())
+
+
+@app.errorhandler(BadRequest)
+def handle_badrequest(e: BadRequest):
+    _error_notification(request)
+    return str(e.get_description())
 
 
 if __name__ == '__main__':
