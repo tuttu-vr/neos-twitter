@@ -316,11 +316,21 @@ def healthcheck():
     return 'OK'
 
 
-@app.errorhandler(Exception)
-def handle_500(e):
+def _error_notification(request):
     remote_addr = _get_remote_addr(request)
     error_log = f'{request.url}\n{remote_addr}\n{traceback.format_exc()}'
     notification.send_message(error_log)
+
+
+@app.errorhandler(503)
+def handle_503(e):
+    _error_notification(request)
+    return 'Something went wrong. Check params and try again.', 503
+
+
+@app.errorhandler(500)
+def handle_500(e):
+    _error_notification(request)
     return 'Something went wrong. Check params and try again.', 500
 
 
