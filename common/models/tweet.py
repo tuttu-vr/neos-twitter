@@ -66,10 +66,6 @@ class Tweet(Base):
 
         return tweet
 
-    @classmethod
-    def deprecated_filters(cls, status: Status):
-        return not status.full_text.startswith('RT ')
-
     def to_dict(self):
         _dict = {col.name: getattr(self, col.name) for col in self.__table__.columns}
         return _dict
