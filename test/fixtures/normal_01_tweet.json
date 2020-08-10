@@ -11,6 +11,7 @@
                 "profile_image_url_https": "https://pbs.twimg.com/profile_images/1228677608545538048/Tcguv7Tw_400x400.jpg"
             },
             "created_at": "Fri Jul 03 15:00:00 +0000 2020",
+            "retweeted_status": null,
             "favorite_count": 0,
             "retweet_count": 0,
             "favorited": false,
@@ -27,6 +28,23 @@
                 "profile_image_url_https": "https://placehold.jp/400x400.png"
             },
             "created_at": "Fri Jul 03 15:01:00 +0000 2020",
+            "retweeted_status": {
+                "id": 1000,
+                "full_text": "これはリツイートです",
+                "media": [],
+                "user": {
+                    "id_str": "01",
+                    "name": "はろ",
+                    "screen_name": "id_3232_haro",
+                    "profile_image_url_https": "https://pbs.twimg.com/profile_images/1228677608545538048/Tcguv7Tw_400x400.jpg"
+                },
+                "created_at": "Fri Jul 03 14:00:00 +0000 2020",
+                "retweeted_status": null,
+                "favorite_count": 0,
+                "retweet_count": 0,
+                "favorited": false,
+                "retweeted": false
+            },
             "favorite_count": 0,
             "retweet_count": 0,
             "favorited": false,
@@ -43,6 +61,7 @@
                 "profile_image_url_https": ""
             },
             "created_at": "Fri Jul 03 15:02:00 +0000 2020",
+            "retweeted_status": null,
             "favorite_count": 0,
             "retweet_count": 0,
             "favorited": false,
@@ -59,6 +78,7 @@
                 "profile_image_url_https": "https://placehold.jp/400x400.png"
             },
             "created_at": "Fri Jul 03 15:03:00 +0000 2020",
+            "retweeted_status": null,
             "favorite_count": 0,
             "retweet_count": 0,
             "favorited": false,
@@ -77,6 +97,7 @@
                 "profile_image_url_https": "https://pbs.twimg.com/profile_images/1228677608545538048/Tcguv7Tw_400x400.jpg"
             },
             "created_at": "Fri Jul 03 15:00:00 +0000 2020",
+            "retweeted_status": null,
             "favorite_count": 0,
             "retweet_count": 0,
             "favorited": false,
@@ -93,6 +114,7 @@
                 "profile_image_url_https": "https://placehold.jp/400x400.png"
             },
             "created_at": "Fri Jul 03 15:33:00 +0000 2020",
+            "retweeted_status": null,
             "favorite_count": 0,
             "retweet_count": 0,
             "favorited": false,

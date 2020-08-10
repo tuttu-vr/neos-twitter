@@ -39,15 +39,17 @@ class Tweet(Base):
     @classmethod
     def create(cls, status: Status, neotter_user_id: str, contain_retweet: bool=False):
         # deprecated process / TODO: remove
-        if not contain_retweet and not cls.deprecated_filters(status):
+        if not contain_retweet and status.retweeted_status:
             return None
+        if status.retweeted_status:
+            status = status.retweeted_status
         created_at = datetime.datetime.strptime(
             status.created_at, TWITTER_DATETIME_FORMAT
         ).strftime(INNER_DATETIME_FORMAT)
 
         tweet = Tweet(
             message_id = f'{neotter_user_id}-{status.id}',
-            message = quote(status.full_text),
+            message = quote(status.full_text if status.full_text else status.text),
             user_id = status.user.id_str,
             created_datetime = created_at,
             neotter_user_id = neotter_user_id,

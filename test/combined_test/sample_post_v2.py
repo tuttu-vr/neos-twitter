@@ -52,4 +52,4 @@ if __name__ == '__main__':
     #     'http://placehold.jp/24/cc9999/993333/150x100.png'
     # ])
     # like_tweet(args.key, 'xxxxxx')
-    retweet_tweet(args.key, 'xxxxxx')
+    retweet_tweet(args.key, '1292447830238539776')
