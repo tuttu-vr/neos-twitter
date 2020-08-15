@@ -1,5 +1,5 @@
 import datetime
-from common.configs import datetime_format, TIMEZONE_UTC, TIMEZONE_LOCAL
+from common.configs import datetime_format, TIMEZONE_UTC
 
 DATETIME_FORMAT = datetime_format
 
@@ -16,5 +16,6 @@ def datetime_to_neotter_inner(datetime_obj: datetime.datetime):
     return datetime_obj.astimezone(tz=TIMEZONE_UTC).strftime(DATETIME_FORMAT)
 
 
-def day_after(days: int=0):
-    return datetime.datetime.now(tz=TIMEZONE_UTC) + datetime.timedelta(days=days)
+def day_after(days: int = 0):
+    return datetime.datetime.now(tz=TIMEZONE_UTC) \
+        + datetime.timedelta(days=days)

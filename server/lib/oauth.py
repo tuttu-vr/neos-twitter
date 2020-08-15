@@ -22,7 +22,7 @@ authenticate_url = f'{twitter_api_host}/oauth/authenticate'
 access_token_url = f'{twitter_api_host}/oauth/access_token'
 
 oauth_callback = (f'{NEOTTER_PROTO}://'
-    f'{NEOTTER_HOST_NAME}{NEOTTER_PORT}/register')
+                  f'{NEOTTER_HOST_NAME}{NEOTTER_PORT}/register')
 
 
 def get_authenticate_endpoint():
@@ -37,7 +37,7 @@ def get_authenticate_endpoint():
 
     if 'oauth_token' not in request_token:
         logger.error('No oauth_token found. '
-            'Have you set TWITTER_CONSUMER_KEY/SECRET?')
+                     'Have you set TWITTER_CONSUMER_KEY/SECRET?')
         return None
 
     authenticate_endpoint = '%s?oauth_token=%s' \

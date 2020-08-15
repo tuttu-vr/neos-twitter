@@ -41,7 +41,7 @@ def get_recent_messages(
     return _merge_result(messages)
 
 
-def get_timeline_messages(user_id: str, from_id: str=0, count: int=10):
+def get_timeline_messages(user_id: str, from_id: str = 0, count: int = 10):
     session = db.get_session()
     try:
         messages = session.query(Tweet, TwitterUser) \
@@ -67,7 +67,7 @@ def get_timeline_messages(user_id: str, from_id: str=0, count: int=10):
 
 def extract_tweet_and_user(
         status: Status, neotter_user_id: str,
-        extract_retweet: bool=True) -> (Tweet, TwitterUser):
+        extract_retweet: bool = True) -> (Tweet, TwitterUser):
     if extract_retweet and status.retweeted_status:
         logger.debug(status.retweeted_status)
         status = status.retweeted_status

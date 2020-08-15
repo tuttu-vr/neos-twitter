@@ -2,7 +2,7 @@ from typing import List
 import traceback
 from logging import getLogger
 
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import OperationalError, InternalError
 
@@ -26,15 +26,16 @@ class TwitterUser(Base):
     @classmethod
     def create(cls, user: User) -> "TwitterUser":
         twitter_user = TwitterUser(
-            user_id = user.id_str,
-            name = f'{user.name}@{user.screen_name}',
-            icon_url = user.profile_image_url_https
+            user_id=user.id_str,
+            name=f'{user.name}@{user.screen_name}',
+            icon_url=user.profile_image_url_https
         )
 
         return twitter_user
 
     def to_dict(self):
-        _dict = {col.name: getattr(self, col.name) for col in self.__table__.columns}
+        _dict = {col.name: getattr(self, col.name)
+                 for col in self.__table__.columns}
         return _dict
 
 
@@ -61,5 +62,6 @@ def add_all(users: List[User]):
 
 def get_by_id(user_id: str) -> TwitterUser:
     session = db.get_session()
-    user = session.query(TwitterUser).filter(TwitterUser.user_id == user_id).first()
+    user = session.query(TwitterUser).filter(
+        TwitterUser.user_id == user_id).first()
     return user

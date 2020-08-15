@@ -31,7 +31,7 @@ def _merge_status_and_user(status, neotter_user_id: str) -> dict:
 
 def _statuses_to_dict_list(
         status_list_raw: list, neotter_user_id: str,
-        distinct: bool=False) -> List[Dict]:
+        distinct: bool = False) -> List[Dict]:
     # need to be tested
     # neotter_user_id is not used
     uniques = set()
@@ -54,7 +54,8 @@ def get_status_list(user: NeotterUser, status_id_list_str: str) -> List[Dict]:
     return _statuses_to_dict_list(status_list_raw, user.id)
 
 
-def get_user_timeline(user: NeotterUser, twitter_user_id: str, count: int=50):
+def get_user_timeline(
+        user: NeotterUser, twitter_user_id: str, count: int = 50):
     api = _api_by_user(user)
     user_timeline = api.GetUserTimeline(twitter_user_id, count=50)
     if len(user_timeline) > 0:
