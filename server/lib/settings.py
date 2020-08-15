@@ -26,9 +26,12 @@ def logging_config(debug=False):
 
 
 def get_arguments():
-    parser = argparse.ArgumentParser(description='This is personal twitter api.')
-    parser.add_argument('--debug', action='store_true', help='enable debug mode')
-    parser.add_argument('--host', default='localhost', help='specify host name')
+    parser = argparse.ArgumentParser(
+        description='This is personal twitter api.')
+    parser.add_argument(
+        '--debug', action='store_true', help='enable debug mode')
+    parser.add_argument(
+        '--host', default='localhost', help='specify host name')
     parser.add_argument('--port', type=int, default=80, help='specify port')
     args = parser.parse_args()
     return args

@@ -4,16 +4,24 @@ import datetime
 import traceback
 from requests.exceptions import ConnectionError
 from urllib.parse import quote
-from logging import getLogger, DEBUG, INFO
+from logging import getLogger
 from flask import Flask, request, render_template, redirect, url_for, session
-from werkzeug.exceptions import BadRequestKeyError, BadRequest, InternalServerError
+from werkzeug.exceptions import (
+    BadRequestKeyError,
+    BadRequest,
+    InternalServerError
+)
 
 from lib import oauth, notification
-from lib.session import validate_token, generate_new_session, validate_session_id
+from lib.session import (
+    validate_token,
+    generate_new_session,
+    validate_session_id
+)
 from lib.settings import logging_config, get_arguments, TWEET_DELIMITER
 from lib.model_utils.messages import get_recent_messages
 from common import configs
-from common.lib import crypt
+from common.lib import crypt, datetime_utils
 from common.models import neotter_user
 
 import api.v2.response
@@ -34,8 +42,10 @@ TIMEZONE_UTC = datetime.timezone(datetime.timedelta(hours=+0), 'UTC')
 def _process_messages(messages, start_time):
     # TODO process have to be into Message class
     def process_message(mes):
-        utc_time = datetime.datetime.strptime(mes['created_datetime'], DATETIME_FORMAT).replace(tzinfo=TIMEZONE_UTC)
-        local_time_str = utc_time.astimezone(TIMEZONE_LOCAL).strftime(DATETIME_FORMAT)
+        utc_time = datetime_utils.neotter_inner_to_datetime(
+            mes['created_datetime'])
+        local_time_str = utc_time.astimezone(
+            TIMEZONE_LOCAL).strftime(DATETIME_FORMAT)
         try:
             return ';'.join([
                 quote(local_time_str),
@@ -49,7 +59,8 @@ def _process_messages(messages, start_time):
             for key in mes.keys():
                 logger.error('%s=%s' % (key, str(mes[key])))
             return None
-    text_list = list(filter(lambda x: x, [process_message(mes) for mes in messages]))
+    text_list = list(
+        filter(lambda x: x, [process_message(mes) for mes in messages]))
     response = DELIMITER.join(text_list)
     return f'{start_time}|{len(text_list)}|{response}'
 
@@ -60,7 +71,8 @@ def _get_user(token: str, remote_addr: str) -> neotter_user.NeotterUser:
     user = neotter_user.get_by_token(token)
     if not user:
         raise ValueError(f'Error: invalid token {token}')
-    if user.enable_ip_confirm and crypt.decrypt(user.remote_addr) != remote_addr:
+    if user.enable_ip_confirm \
+            and crypt.decrypt(user.remote_addr) != remote_addr:
         raise ValueError(f'Error: invalid addr {remote_addr}')
     return user
 
@@ -79,30 +91,40 @@ def _get_remote_addr(request):
 
 def _get_start_time(start_time: str):
     if not start_time:
-        start_time_utc = (datetime.datetime.now(TIMEZONE_UTC) - datetime.timedelta(minutes=DEFAULT_BACKTIME_MINUTES))
-        start_time = start_time_utc.astimezone(TIMEZONE_LOCAL).strftime(DATETIME_FORMAT)
+        start_time_utc = datetime.datetime.now(TIMEZONE_UTC) - \
+            datetime.timedelta(minutes=DEFAULT_BACKTIME_MINUTES)
+        start_time = start_time_utc.astimezone(
+            TIMEZONE_LOCAL).strftime(DATETIME_FORMAT)
         return start_time, start_time_utc
     try:
-        start_time_local = datetime.datetime.strptime(start_time, DATETIME_FORMAT).replace(tzinfo=TIMEZONE_LOCAL)
+        start_time_local = datetime.datetime.strptime(
+            start_time, DATETIME_FORMAT).replace(tzinfo=TIMEZONE_LOCAL)
         start_time_utc = start_time_local.astimezone(TIMEZONE_UTC)
         logger.debug(start_time_utc)
         return start_time, start_time_utc
     except ValueError:
         # to avoid sql injection
-        raise ValueError(f'error: start time format must be "{DATETIME_FORMAT}" but "{start_time}"')
+        raise ValueError(
+            f'error: start time format must be '
+            f'"{DATETIME_FORMAT}" but "{start_time}"')
+
 
 message_processer = {
     'v1': _process_messages,
     'v2': api.v2.response.get_recent_response
 }
 
-def _get_recent(count: int, offset: int, start_time: str, user_token: str, remote_addr: str, version: str='v1'):
+
+def _get_recent(
+        count: int, offset: int, start_time: str, user_token: str,
+        remote_addr: str, version: str = 'v1'):
     user = _get_user(user_token, remote_addr).to_dict()
     start_time, start_time_utc = _get_start_time(start_time)
 
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
 
-    messages = get_recent_messages(count, offset, start_time_utc.strftime(DATETIME_FORMAT), user['id'])
+    messages = get_recent_messages(
+        count, offset, start_time_utc.strftime(DATETIME_FORMAT), user['id'])
     neotter_user.extend_expiration(user['id'])
     response = message_processer[version](messages, start_time)
     return response
@@ -111,63 +133,65 @@ def _get_recent(count: int, offset: int, start_time: str, user_token: str, remot
 @app.route('/recent')
 def get_recent():
     # deprecated
-    count      = request.args.get('count', default=3, type=int)
-    offset     = request.args.get('offset', default=0, type=int)
+    count = request.args.get('count', default=3, type=int)
+    offset = request.args.get('offset', default=0, type=int)
     start_time = request.args.get('start_time', default=None, type=str)
     user_token = request.args.get('key', default=None, type=str)
-    remote_addr= _get_remote_addr(request)
+    remote_addr = _get_remote_addr(request)
     return _get_recent(count, offset, start_time, user_token, remote_addr)
 
 
 @app.route('/api/v2/recent')
 def get_recent_v2():
     # deprecated
-    count      = request.args.get('count', default=3, type=int)
-    offset     = request.args.get('offset', default=0, type=int)
+    count = request.args.get('count', default=3, type=int)
+    offset = request.args.get('offset', default=0, type=int)
     start_time = request.args.get('start_time', default=None, type=str)
     user_token = request.args.get('key', default=None, type=str)
-    remote_addr= _get_remote_addr(request)
-    return _get_recent(count, offset, start_time, user_token, remote_addr, version='v2')
+    remote_addr = _get_remote_addr(request)
+    return _get_recent(
+        count, offset, start_time, user_token, remote_addr, version='v2')
 
 
-def _get_home_timeline(user: neotter_user.NeotterUser, from_id: int, count: int):
+def _get_home_timeline(
+        user: neotter_user.NeotterUser, from_id: int, count: int):
     neotter_user.extend_expiration(user.id)
     return api.v2.response.get_home_timeline(user, from_id, count)
 
 
 @app.route('/api/v2/home-timeline')
 def get_home_timeline():
-    count      = request.args.get('count', default=3, type=int)
-    from_id    = request.args.get('from_id', default=None, type=str)
+    count = request.args.get('count', default=3, type=int)
+    from_id = request.args.get('from_id', default=None, type=str)
     user_token = request.args.get('key', default=None, type=str)
-    remote_addr= _get_remote_addr(request)
-    user       = _get_user(user_token, remote_addr)
+    remote_addr = _get_remote_addr(request)
+    user = _get_user(user_token, remote_addr)
     return _get_home_timeline(user, from_id, count)
 
 
 @app.route('/api/v2/status-list')
 def get_status_list():
     request_status_id = request.args.get('status_ids', default='', type=str)
-    user_token        = request.args.get('key', default=None, type=str)
-    remote_addr       = _get_remote_addr(request)
-    user              = _get_user(user_token, remote_addr)
+    user_token = request.args.get('key', default=None, type=str)
+    remote_addr = _get_remote_addr(request)
+    user = _get_user(user_token, remote_addr)
     return api.v2.response.get_status_list(request_status_id, user)
 
 
 @app.route('/api/v2/user-timeline')
 def get_user_timeline():
     twitter_user_id = request.args.get('user_id', default=None, type=str)
-    user_token      = request.args.get('key', default=None, type=str)
-    remote_addr     = _get_remote_addr(request)
-    user            = _get_user(user_token, remote_addr)
+    user_token = request.args.get('key', default=None, type=str)
+    remote_addr = _get_remote_addr(request)
+    user = _get_user(user_token, remote_addr)
     return api.v2.response.get_user_timeline(user, twitter_user_id)
 
 
 @app.route('/api/v2/search-result')
 def get_search_result():
     search_query = request.args.get('query', default='', type=str)
-    user_token   = request.args.get('key', default=None, type=str)
-    remote_addr  = _get_remote_addr(request)
+    user_token = request.args.get('key', default=None, type=str)
+    remote_addr = _get_remote_addr(request)
     logger.debug(search_query)
     if not search_query:
         raise BadRequest('Error: No search query.')
@@ -181,17 +205,19 @@ def login():
         endpoint = oauth.get_authenticate_endpoint()
     except ConnectionError:
         logger.error(traceback.format_exc())
-        raise InternalServerError('Failed to access twitter. Please try again later.')
-    return render_template('login.html', endpoint=endpoint, title='Neotter login')
+        raise InternalServerError(
+            'Failed to access twitter. Please try again later.')
+    return render_template(
+        'login.html', endpoint=endpoint, title='Neotter login')
 
 
 @app.route('/api/v2/message', methods=['POST'])
 def create_message():
     try:
-        message    = request.form['message']
+        message = request.form['message']
         user_token = request.form['key']
-        media      = request.form.get('media')
-        remote_addr= _get_remote_addr(request)
+        media = request.form.get('media')
+        remote_addr = _get_remote_addr(request)
     except BadRequestKeyError:
         logger.error(traceback.format_exc())
         raise BadRequest('Missing parameter')
@@ -207,8 +233,8 @@ def create_message():
 @app.route('/api/v2/like', methods=['POST'])
 def add_like_reaction():
     try:
-        message_id  = request.form['message_id']
-        user_token  = request.form['key']
+        message_id = request.form['message_id']
+        user_token = request.form['key']
         remote_addr = _get_remote_addr(request)
     except BadRequestKeyError:
         logger.error(traceback.format_exc())
@@ -221,8 +247,8 @@ def add_like_reaction():
 @app.route('/api/v2/retweet', methods=['POST'])
 def retweet_tweet():
     try:
-        message_id  = request.form['message_id']
-        user_token  = request.form['key']
+        message_id = request.form['message_id']
+        user_token = request.form['key']
         remote_addr = _get_remote_addr(request)
     except BadRequestKeyError:
         logger.error(traceback.format_exc())
@@ -276,7 +302,8 @@ def user_page():
         'name': user_data.name,
         'token': user_data.token
     }
-    return render_template('user-page.html', user=user, title='Neotter user page')
+    return render_template(
+        'user-page.html', user=user, title='Neotter user page')
 
 
 @app.route('/api/new-token')
