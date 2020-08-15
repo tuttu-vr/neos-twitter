@@ -32,7 +32,7 @@ class TestRecentV2(unittest.TestCase):
         count = 3
         offset = 0
         start_time = None
-        expected_expiration = datetime.datetime.now() + datetime.timedelta(days=configs.auth_expiration_date)
+        expected_expiration = datetime.datetime.now(tz=configs.TIMEZONE_UTC) + datetime.timedelta(days=configs.auth_expiration_date)
         table_name = 'neotter_users'
         for user in self.db_data[table_name]:
             user_token = user['token']
@@ -40,7 +40,7 @@ class TestRecentV2(unittest.TestCase):
             user_id = user['id']
             app._get_recent(count, offset, start_time, user_token, remote_addr, version='v2')
             data = test_db.get_single_data(table_name, {'id': user_id}, dict_row=True)
-            got_expiration = datetime.datetime.strptime(data['expired'], DATETIME_FORMAT)
+            got_expiration = datetime.datetime.strptime(data['expired'], DATETIME_FORMAT).replace(tzinfo=configs.TIMEZONE_UTC)
             self.assertLessEqual(abs(expected_expiration - got_expiration), datetime.timedelta(minutes=1))
 
     def test_get_recent(self):
