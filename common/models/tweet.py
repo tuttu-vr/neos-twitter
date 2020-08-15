@@ -37,7 +37,9 @@ class Tweet(Base):
     __tablename__ = 'messages'
 
     @classmethod
-    def create(cls, status: Status, neotter_user_id: str, contain_retweet: bool=False):
+    def create(
+            cls, status: Status, neotter_user_id: str,
+            contain_retweet: bool = False):
         # deprecated process / TODO: remove
         if not contain_retweet and status.retweeted_status:
             return None
@@ -48,26 +50,28 @@ class Tweet(Base):
         ).strftime(INNER_DATETIME_FORMAT)
 
         tweet = Tweet(
-            message_id = f'{neotter_user_id}-{status.id}',
-            message = quote(status.full_text if status.full_text else status.text),
-            user_id = status.user.id_str,
-            created_datetime = created_at,
-            neotter_user_id = neotter_user_id,
-            favorite_count = status.favorite_count,
-            retweet_count = status.retweet_count,
-            favorited = status.favorited,
-            retweeted = status.retweeted
+            message_id=f'{neotter_user_id}-{status.id}',
+            message=quote(
+                status.full_text if status.full_text else status.text),
+            user_id=status.user.id_str,
+            created_datetime=created_at,
+            neotter_user_id=neotter_user_id,
+            favorite_count=status.favorite_count,
+            retweet_count=status.retweet_count,
+            favorited=status.favorited,
+            retweeted=status.retweeted
         )
 
         if status.media:
             tweet.attachments = ','.join(map(
                 lambda m: m.media_url_https, filter(
-                    lambda m: m.type=='photo', status.media)))
+                    lambda m: m.type == 'photo', status.media)))
 
         return tweet
 
     def to_dict(self):
-        _dict = {col.name: getattr(self, col.name) for col in self.__table__.columns}
+        _dict = {col.name: getattr(self, col.name)
+                 for col in self.__table__.columns}
         return _dict
 
 
@@ -101,11 +105,13 @@ def add_all(status_list: List[Status], neotter_user_id: str):
 
 
 def delete_old_tweets(hour_before: int):
-    delete_from = (datetime.datetime.now() - datetime.timedelta(hours=hour_before)) \
+    delete_from = (datetime.datetime.now() -
+                   datetime.timedelta(hours=hour_before)) \
         .strftime(INNER_DATETIME_FORMAT)
     session = db.get_session()
     try:
-        session.query(Tweet).filter(Tweet.created_datetime <= delete_from).delete()
+        session.query(Tweet).filter(
+            Tweet.created_datetime <= delete_from).delete()
     except (OperationalError, InternalError):
         logger.error(traceback.format_exc())
         session.rollback()

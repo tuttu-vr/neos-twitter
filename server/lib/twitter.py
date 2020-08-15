@@ -1,17 +1,11 @@
 import traceback
 from typing import List, Dict
 from logging import getLogger
-from urllib.parse import quote
 from twitter import TwitterError
 
 from common.models.neotter_user import NeotterUser
-from common.models.tweet import Tweet
-from common.models.twitter_user import TwitterUser
 from common.lib import twitter
-from lib.settings import TWEET_DELIMITER
 from lib.model_utils.messages import extract_tweet_and_user
-
-from api.v2 import response
 
 logger = getLogger(__name__)
 
@@ -20,7 +14,7 @@ def _parse_parameter(list_str: str) -> List[int]:
     try:
         return list(map(int, list_str.split(',')))
     except ValueError:
-        raise ValueError(f'error: failed to parse request parameter')
+        raise ValueError('error: failed to parse request parameter')
 
 
 def _api_by_user(user: NeotterUser):
@@ -35,7 +29,9 @@ def _merge_status_and_user(status, neotter_user_id: str) -> dict:
     return response
 
 
-def _statuses_to_dict_list(status_list_raw: list, neotter_user_id: str, distinct: bool=False) -> List[Dict]:
+def _statuses_to_dict_list(
+        status_list_raw: list, neotter_user_id: str,
+        distinct: bool = False) -> List[Dict]:
     # need to be tested
     # neotter_user_id is not used
     uniques = set()
@@ -58,7 +54,8 @@ def get_status_list(user: NeotterUser, status_id_list_str: str) -> List[Dict]:
     return _statuses_to_dict_list(status_list_raw, user.id)
 
 
-def get_user_timeline(user: NeotterUser, twitter_user_id: str, count: int=50):
+def get_user_timeline(
+        user: NeotterUser, twitter_user_id: str, count: int = 50):
     api = _api_by_user(user)
     user_timeline = api.GetUserTimeline(twitter_user_id, count=50)
     if len(user_timeline) > 0:
