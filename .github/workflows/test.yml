@@ -21,3 +21,6 @@ jobs:
         cd test
         find collector -name 'test_*.py' | xargs python -m unittest
         find server -name 'test_*.py' | xargs python -m unittest
+    - name: Lint
+      run: |
+        flake8 server common collector
