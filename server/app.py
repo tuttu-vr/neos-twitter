@@ -116,8 +116,7 @@ message_processer = {
 
 
 def _get_recent(
-        count: int, offset: int, start_time: str, user_token: str,
-        remote_addr: str, version: str = 'v1'):
+        count: int, offset: int, start_time: str, user_token: str, remote_addr: str, version: str = 'v1'):
     user = _get_user(user_token, remote_addr).to_dict()
     start_time, start_time_utc = _get_start_time(start_time)
 
