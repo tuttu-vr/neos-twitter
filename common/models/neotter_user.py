@@ -39,6 +39,21 @@ class NeotterUser(Base):
         return crypt.decrypt(self.access_key), crypt.decrypt(self.access_secret)
 
 
+def register(user_dict: dict):
+    user = NeotterUser(**user_dict)
+    session = db.get_session()
+    try:
+        session.add(user)
+    except (OperationalError, InternalError):
+        logger.error(traceback.format_exc())
+        session.rollback()
+        raise ValueError('Failed to register user.')
+    else:
+        session.commit()
+    finally:
+        session.close()
+
+
 def delete_expired_users():
     current = datetime.datetime.utcnow().strftime(DATETIME_FORMAT)
     session = db.get_session()

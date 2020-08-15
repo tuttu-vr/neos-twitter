@@ -8,7 +8,7 @@ from logging import getLogger, DEBUG, INFO
 from flask import Flask, request, render_template, redirect, url_for, session
 from werkzeug.exceptions import BadRequestKeyError, BadRequest, InternalServerError
 
-from lib import oauth, db_write, notification
+from lib import oauth, notification
 from lib.session import validate_token, generate_new_session, validate_session_id
 from lib.settings import logging_config, get_arguments, TWEET_DELIMITER
 from lib.model_utils.messages import get_recent_messages
@@ -103,7 +103,7 @@ def _get_recent(count: int, offset: int, start_time: str, user_token: str, remot
     logger.debug(f'count={count} offset={offset} start_time={start_time}')
 
     messages = get_recent_messages(count, offset, start_time_utc.strftime(DATETIME_FORMAT), user['id'])
-    db_write.update_auth_expiration(user)
+    neotter_user.extend_expiration(user['id'])
     response = message_processer[version](messages, start_time)
     return response
 
@@ -141,7 +141,7 @@ def get_home_timeline():
     from_id    = request.args.get('from_id', default=None, type=str)
     user_token = request.args.get('key', default=None, type=str)
     remote_addr= _get_remote_addr(request)
-    user = _get_user(user_token, remote_addr)
+    user       = _get_user(user_token, remote_addr)
     return _get_home_timeline(user, from_id, count)
 
 
@@ -150,7 +150,7 @@ def get_status_list():
     request_status_id = request.args.get('status_ids', default='', type=str)
     user_token        = request.args.get('key', default=None, type=str)
     remote_addr       = _get_remote_addr(request)
-    user = _get_user(user_token, remote_addr)
+    user              = _get_user(user_token, remote_addr)
     return api.v2.response.get_status_list(request_status_id, user)
 
 
@@ -159,7 +159,7 @@ def get_user_timeline():
     twitter_user_id = request.args.get('user_id', default=None, type=str)
     user_token      = request.args.get('key', default=None, type=str)
     remote_addr     = _get_remote_addr(request)
-    user = _get_user(user_token, remote_addr)
+    user            = _get_user(user_token, remote_addr)
     return api.v2.response.get_user_timeline(user, twitter_user_id)
 
 
@@ -207,9 +207,9 @@ def create_message():
 @app.route('/api/v2/like', methods=['POST'])
 def add_like_reaction():
     try:
-        message_id    = request.form['message_id']
-        user_token = request.form['key']
-        remote_addr= _get_remote_addr(request)
+        message_id  = request.form['message_id']
+        user_token  = request.form['key']
+        remote_addr = _get_remote_addr(request)
     except BadRequestKeyError:
         logger.error(traceback.format_exc())
         raise BadRequest('Missing parameter')
@@ -221,9 +221,9 @@ def add_like_reaction():
 @app.route('/api/v2/retweet', methods=['POST'])
 def retweet_tweet():
     try:
-        message_id    = request.form['message_id']
-        user_token = request.form['key']
-        remote_addr= _get_remote_addr(request)
+        message_id  = request.form['message_id']
+        user_token  = request.form['key']
+        remote_addr = _get_remote_addr(request)
     except BadRequestKeyError:
         logger.error(traceback.format_exc())
         raise BadRequest('Missing parameter')
@@ -241,7 +241,7 @@ def register():
 
     user_data = oauth.get_access_token(oauth_token, oauth_verifier)
     logger.debug(user_data)
-    neotter_user = {
+    user_dict = {
         'id': user_data['user_id'],
         'name': user_data['screen_name'],
         'access_key': crypt.encrypt(user_data['oauth_token']),
@@ -251,10 +251,10 @@ def register():
     }
 
     new_session_info = generate_new_session()
-    neotter_user.update(new_session_info)
+    user_dict.update(new_session_info)
 
     try:
-        db_write.register_user(neotter_user)
+        neotter_user.register(user_dict)
     except ValueError as e:
         raise InternalServerError(str(e))
     session_id = new_session_info['session_id']
