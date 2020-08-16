@@ -79,7 +79,8 @@ def get_search_result(user: NeotterUser, search_query: str) -> List[Dict]:
 def post_message(user: NeotterUser, message: str, media_url_list: List[str]):
     api = _api_by_user(user)
     try:
-        status = api.PostUpdate(message, media=media_url_list)
+        media_id_list = [api.UploadMediaSimple(url) for url in media_url_list]
+        status = api.PostUpdate(message, media=media_id_list)
         if status.full_text is None:
             status.full_text = status.text
         tweet = _merge_status_and_user(status, user.id)
