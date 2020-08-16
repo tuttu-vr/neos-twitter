@@ -47,7 +47,7 @@ def register(user_dict: dict):
     user = NeotterUser(**user_dict)
     session = db.get_session()
     try:
-        session.add(user)
+        session.merge(user)
     except (OperationalError, InternalError):
         logger.error(traceback.format_exc())
         session.rollback()
