@@ -1,7 +1,7 @@
 import traceback
 from typing import List, Dict
 from logging import getLogger
-from twitter import TwitterError
+from twitter import TwitterError, Status
 
 from common.models.neotter_user import NeotterUser
 from common.lib import twitter
@@ -22,7 +22,7 @@ def _api_by_user(user: NeotterUser):
     return twitter.get_twitter_api(access_key, access_secret)
 
 
-def _merge_status_and_user(status, neotter_user_id: str) -> dict:
+def _merge_status_and_user(status: Status, neotter_user_id: str) -> dict:
     tweet, user = extract_tweet_and_user(status, neotter_user_id)
     response = user.to_dict()
     response.update(tweet.to_dict())
@@ -54,6 +54,12 @@ def get_status_list(user: NeotterUser, status_id_list_str: str) -> List[Dict]:
     return _statuses_to_dict_list(status_list_raw, user.id)
 
 
+def update_statuses(api, status_list: list) -> Status:
+    status_list_ids = list(map(lambda tw: tw.id_str, status_list))
+    status_list_updated = api.GetStatuses(status_list_ids)
+    return status_list_updated
+
+
 def get_user_timeline(
         user: NeotterUser, twitter_user_id: str, count: int = 50):
     api = _api_by_user(user)
@@ -72,7 +78,7 @@ def get_search_result(user: NeotterUser, search_query: str) -> List[Dict]:
         'count': 50
     }
     api = _api_by_user(user)
-    search_result = api.GetSearch(**query)
+    search_result = update_statuses(api, api.GetSearch(**query))
     return _statuses_to_dict_list(search_result, user.id, distinct=True)
 
 
