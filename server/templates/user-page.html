@@ -3,9 +3,9 @@
 <main>
     <section class="uk-section uk-section-small">
         <div class="uk-container uk-container-small uk-section-small uk-box-shadow-medium">
-            <h1>Neotter認証トークン</h1>
-            こんにちは、{{user.name}}さん<br/>
-            こちらのトークンをNeotterに貼り付けてください
+            <h1>{{ gettext('Neotter認証トークン') }}</h1>
+            {{ gettext('こんにちは、') }}{{user.name}}{{ gettext('接尾辞敬称') }}<br/>
+            {{ gettext('こちらのトークンをNeotterに貼り付けてください') }}
             <div  class="uk-section uk-section-small">
                 <div class="uk-container uk-container-default" uk-grid>
                     <div class="uk-flex uk-flex-center uk-width-2-3">
