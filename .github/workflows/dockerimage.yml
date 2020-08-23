@@ -18,6 +18,8 @@ jobs:
         mv docker-compose-prod.yml docker-compose.yml
         touch collector/.env
         touch server/.env
+        python -m pip install --upgrade pip
+        pip install Flask-Babel
         ./build.sh full
         docker-compose -f docker-compose-rproxy.yml build
     - name: Push the Docker images

@@ -3,11 +3,11 @@
 <main>
     <section class="uk-section uk-section-small">
         <div class="uk-container uk-container-small uk-section-small uk-box-shadow-medium">
-            <h1>Neotterにログイン</h1>
+            <h1>{{ gettext('Neotterにログイン') }}</h1>
             <a class="uk-link-toggle" href="{{endpoint}}">
                 <button class="uk-button uk-button-primary uk-box-shadow-large">
                     <img id="button-icon" src="{{url_for('static', filename='img/twitter_icon.png')}}">
-                    twitterでログイン
+                    {{ gettext('twitterでログイン') }}
                 </button>
             </a>
         </div>

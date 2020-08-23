@@ -6,6 +6,7 @@ from requests.exceptions import ConnectionError
 from urllib.parse import quote
 from logging import getLogger
 from flask import Flask, request, render_template, redirect, url_for, session
+from flask_babel import Babel
 from werkzeug.exceptions import (
     BadRequestKeyError,
     BadRequest,
@@ -27,6 +28,7 @@ from common.models import neotter_user
 import api.v2.response
 
 app = Flask(__name__)
+babel = Babel(app)
 logger = getLogger(__name__)
 
 
@@ -306,9 +308,9 @@ def user_page():
         'user-page.html', user=user, title='Neotter user page')
 
 
-@app.route('/api/new-token')
-def generate_neotter_token():
-    return 'test'
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(['ja', 'ja_JP', 'en'])
 
 
 @app.route('/health')

@@ -4,3 +4,4 @@ urllib3
 cryptography
 sqlalchemy
 python-twitter
+Flask-Babel
