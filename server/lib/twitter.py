@@ -14,7 +14,7 @@ def _parse_parameter(list_str: str) -> List[int]:
     try:
         return list(map(int, list_str.split(',')))
     except ValueError:
-        raise ValueError('error: failed to parse request parameter')
+        raise ValueError('Error: failed to parse request parameter')
 
 
 def _api_by_user(user: NeotterUser):

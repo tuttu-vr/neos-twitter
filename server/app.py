@@ -107,7 +107,7 @@ def _get_start_time(start_time: str):
     except ValueError:
         # to avoid sql injection
         raise ValueError(
-            f'error: start time format must be '
+            f'Error: start time format must be '
             f'"{DATETIME_FORMAT}" but "{start_time}"')
 
 
@@ -199,6 +199,14 @@ def get_search_result():
         raise BadRequest('Error: No search query.')
     user = _get_user(user_token, remote_addr)
     return api.v2.response.get_search_result(user, search_query)
+
+
+@app.route('/api/v2/neotter-user')
+def get_neotter_users():
+    user_token = request.args.get('key', default=None, type=str)
+    remote_addr = _get_remote_addr(request)
+    user = _get_user(user_token, remote_addr)
+    return api.v2.response.neotter_user_info(user)
 
 
 @app.route('/login')
