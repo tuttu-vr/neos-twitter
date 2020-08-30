@@ -328,7 +328,7 @@ def healthcheck():
 
 def _error_notification(request):
     remote_addr = _get_remote_addr(request)
-    error_log = f'{request.url}\n{remote_addr}\n{traceback.format_exc()}'
+    error_log = f'`{request.url}`\n{remote_addr}\n{traceback.format_exc()}'
     notification.send_message(error_log)
 
 
