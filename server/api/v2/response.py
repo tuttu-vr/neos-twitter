@@ -119,7 +119,8 @@ def get_search_result(user: NeotterUser, query: str) -> str:
     return _join_to_str(search_result)
 
 
-MESSAGE_ERROR_POST = 'Something went wrong. Please check your twitter status.'
+MESSAGE_ERROR_POST = ('Error: Something went wrong. '
+                      'Please check your twitter status.')
 
 
 def create_message(user: NeotterUser, message: str, media_list: List[str]):
@@ -145,3 +146,12 @@ def create_retweet(user: NeotterUser, message_id: str):
         return _process_message(status, blacklist=['message', 'attachments'])
     else:
         raise ValueError(MESSAGE_ERROR_POST)
+
+
+def neotter_user_info(user: NeotterUser):
+    processed = {
+        'id': user.id,
+        'name': user.name
+    }
+    result = ';'.join([f'{key}={value}' for key, value in processed.items()])
+    return result
