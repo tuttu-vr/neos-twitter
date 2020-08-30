@@ -20,7 +20,7 @@ jobs:
         touch server/.env
         python -m pip install --upgrade pip
         pip install Flask-Babel
-        ./build.sh full
+        PATH=$PATH:/home/runner/.local/bin ./build.sh full
         docker-compose -f docker-compose-rproxy.yml build
     - name: Push the Docker images
       if: github.event_name == 'push'
