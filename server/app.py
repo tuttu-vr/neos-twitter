@@ -172,7 +172,7 @@ def get_home_timeline():
     except ValueError as e:
         if 'invalid token' in str(e):
             return api.v2.response.get_error_message(
-                'Token may be wrong or expired. Please re-login.'
+                'Token may be wrong or have expired. Please try re-login.'
                 ' / トークンの期限が切れている、もしくは間違っています。'
                 '再度ログインをお試しください。')
         else:
