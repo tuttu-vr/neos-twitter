@@ -167,7 +167,14 @@ def get_home_timeline():
     from_id = request.args.get('from_id', default=None, type=str)
     user_token = request.args.get('key', default=None, type=str)
     remote_addr = _get_remote_addr(request)
-    user = _get_user(user_token, remote_addr)
+    try:
+        user = _get_user(user_token, remote_addr)
+    except ValueError as e:
+        if 'invalid token' in str(e):
+            return api.v2.response.get_error_message(
+                'Token may be wrong or expired. Please re-login.'
+                ' / トークンの期限が切れている、もしくは間違っています。'
+                '再度ログインをお試しください。')
     return _get_home_timeline(user, from_id, count)
 
 

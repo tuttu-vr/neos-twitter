@@ -155,3 +155,15 @@ def neotter_user_info(user: NeotterUser):
     }
     result = ';'.join([f'{key}={value}' for key, value in processed.items()])
     return result
+
+
+def get_error_message(message: str):
+    data = {
+        'id': '0',
+        'created_at': '',
+        'name': 'System Message',
+        'user_id': '0',
+        'message': message
+    }
+    response = ';'.join([f'{key}={value}' for key, value in data.items()])
+    return response
