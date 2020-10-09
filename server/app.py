@@ -175,6 +175,8 @@ def get_home_timeline():
                 'Token may be wrong or expired. Please re-login.'
                 ' / トークンの期限が切れている、もしくは間違っています。'
                 '再度ログインをお試しください。')
+        else:
+            raise e
     return _get_home_timeline(user, from_id, count)
 
 
